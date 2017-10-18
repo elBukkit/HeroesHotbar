@@ -76,6 +76,7 @@ public class InventoryListener implements Listener {
         InventoryType inventoryType = event.getInventory().getType();
         boolean isPlayerInventory = inventoryType == InventoryType.CRAFTING || inventoryType == InventoryType.PLAYER;
         boolean isDrop = event.getClick() == ClickType.DROP || event.getClick() == ClickType.CONTROL_DROP;
+        isSkill = isSkill || controller.isLegacySkill(clickedItem);
         if (isSkill && !isPlayerInventory) {
             if (!isDrop) {
                 event.setCancelled(true);
