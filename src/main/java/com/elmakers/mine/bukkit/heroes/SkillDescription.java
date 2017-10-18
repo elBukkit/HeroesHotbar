@@ -1,0 +1,86 @@
+package com.elmakers.mine.bukkit.heroes;
+
+import com.herocraftonline.heroes.characters.skill.Skill;
+import com.herocraftonline.heroes.characters.skill.SkillConfigManager;
+import org.bukkit.entity.Player;
+
+public class SkillDescription implements Comparable<SkillDescription> {
+    private final String skillKey;
+    private final String name;
+    private final String description;
+    private final Skill skill;
+    private final int skillLevel;
+    private final MaterialAndData icon;
+    private final MaterialAndData disabledIcon;
+    private final String iconURL;
+    private final String disabledIconURL;
+
+    public SkillDescription(HotbarController controller, Player player, String skillKey) {
+        this.skill = controller.getSkill(skillKey);
+        this.skillKey = skillKey;
+        this.skillLevel = controller.getSkillLevel(player, skillKey);
+
+        String iconURL = SkillConfigManager.getRaw(skill, "icon-url", SkillConfigManager.getRaw(skill, "icon_url", null));
+        String icon = SkillConfigManager.getRaw(skill, "icon", null);
+        if (icon != null && icon.startsWith("http://")) {
+            icon = null;
+            iconURL = icon;
+        }
+        this.icon = icon == null || icon.isEmpty() ? null : new MaterialAndData(icon);
+        this.iconURL = iconURL;
+
+        String iconDisabledURL = SkillConfigManager.getRaw(skill, "icon-disabled-url", SkillConfigManager.getRaw(skill, "icon_disabled_url", null));
+        String iconDisabled = SkillConfigManager.getRaw(skill, "icon-disabled", SkillConfigManager.getRaw(skill, "icon_disabled", null));
+        if (iconDisabled != null && iconDisabled.startsWith("http://")) {
+            iconDisabled = null;
+            iconDisabledURL = icon;
+        }
+
+        this.disabledIcon = iconDisabled == null || iconDisabled.isEmpty() ? null : new MaterialAndData(iconDisabled);
+        this.disabledIconURL = iconDisabledURL;
+
+        String skillDisplayName = SkillConfigManager.getRaw(skill, "name", skill.getName());
+        this.name = skillDisplayName == null || skillDisplayName.isEmpty() ? skillKey : skillDisplayName;
+        this.description = SkillConfigManager.getRaw(skill, "description", "");
+    }
+
+    public boolean isHeroes() {
+        return skillKey != null;
+    }
+
+    @Override
+    public int compareTo(SkillDescription other) {
+        if (skillLevel != other.skillLevel) {
+            return Integer.compare(skillLevel, other.skillLevel);
+        }
+        return getName().compareTo(other.getName());
+    }
+
+    public MaterialAndData getIcon() {
+        return icon;
+    }
+
+    public String getIconURL() {
+        return iconURL;
+    }
+
+    public MaterialAndData getDisabledIcon() {
+        return disabledIcon;
+    }
+
+    public String getDisabledIconURL() {
+        return disabledIconURL;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Skill getSkill() {
+        return skill;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+};

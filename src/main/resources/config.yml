@@ -1,0 +1,46 @@
+# Default skill icon if none is set in skill config
+default_skill_icon: stick
+
+# Number of rows to show in the skill inventory
+skill_inventory_max_rows: 6
+
+# The NBT key used to identify skill items.
+# You generally should not need to change this.
+nbt_key: "heroesskill"
+
+# In-game text
+
+skills:
+    inventory_title_heroes: "$class Skills ($page/$pages)"
+    inventory_title_heroes_secondary: "$class-$class2 Skills ($page/$pages)"
+    item_name: "$skill"
+    item_name_unavailable: "&c$skill"
+    item_description: "$description"
+    passive_description: "&1PASSIVE"
+    none: "You have no skills!"
+    none_on_page: "There are no skills on page $page"
+    level_description: Level $level
+    costs_description: Consumes $description
+    description: "&a&o$description"
+    description_extra: "&2&o$description"
+
+cooldown:
+    wait_seconds: another $seconds seconds
+    wait_minutes: another $minutes minutes
+    wait_hours: another $hours hours
+    wait_moment: a moment
+    wait_second: a second
+    wait_minute: a minute
+    wait_hour: another hour
+    description_seconds: $seconds seconds
+    description_minutes: $minutes minutes
+    description_hours: $hours hours
+    description_minute: One minute
+    description_hour: One hour
+    description_second: One second
+    description_moment: A Moment
+    description: "&eCooldown: &6$time"
+
+costs:
+    heroes_mana: $amount Mana
+

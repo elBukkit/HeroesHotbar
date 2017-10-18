@@ -1,6 +1,7 @@
 package com.elmakers.mine.bukkit.heroes;
 
 import com.elmakers.mine.bukkit.utility.NMSUtils;
+import com.herocraftonline.heroes.Heroes;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandExecutor;
@@ -25,7 +26,7 @@ public class HotbarPlugin extends JavaPlugin {
     public void onEnable() {
         try {
             heroesPlugin = getServer().getPluginManager().getPlugin("Heroes");
-            if (heroesPlugin == null) {
+            if (heroesPlugin == null || !(heroesPlugin instanceof Heroes)) {
                 Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[HeroesHotbar] Heroes could not be found, HeroesHotbar plugin will not load.");
                 return;
             }
@@ -57,8 +58,10 @@ public class HotbarPlugin extends JavaPlugin {
      * Initialization, set up commands, listeners and controller
      */
     protected void initialize() {
+        saveDefaultConfig();
+
         if (controller == null) {
-            controller = new HotbarController(this, heroesPlugin);
+            controller = new HotbarController(this, (Heroes)heroesPlugin);
         }
 
         controller.initialize();
