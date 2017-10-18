@@ -16,22 +16,25 @@ import com.herocraftonline.heroes.characters.skill.Skill;
 import com.herocraftonline.heroes.characters.skill.SkillConfigManager;
 import com.herocraftonline.heroes.characters.skill.SkillManager;
 import com.herocraftonline.heroes.characters.skill.SkillSetting;
-import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.Configuration;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
 import org.bukkit.plugin.Plugin;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+import java.util.logging.Logger;
 
 /**
  * This class manages the centralized hotbar functionality.
@@ -45,9 +48,12 @@ public class HotbarController {
     private final CharacterManager characters;
     private final SkillManager skills;
 
-    private String skillKey;
+    private String skillNBTKey;
+    private String legacyNBTKey;
     private int skillInventoryRows;
     private MaterialAndData defaultSkillIcon;
+
+    private Map<UUID, SkillSelector> selectors = new HashMap<>();
 
     public HotbarController(Plugin owningPlugin, Heroes heroesPlugin) {
         this.plugin = owningPlugin;
@@ -57,10 +63,11 @@ public class HotbarController {
 
     public void initialize() {
         Configuration config = plugin.getConfig();
-        skillKey = config.getString("nbt_key");
-        if (skillKey == null || skillKey.isEmpty()) {
-            skillKey = "heroesskill";
+        skillNBTKey = config.getString("nbt_key");
+        if (skillNBTKey == null || skillNBTKey.isEmpty()) {
+            skillNBTKey = "heroesskill";
         }
+        legacyNBTKey = config.getString("legacy_nbt_key");
 
         skillInventoryRows = config.getInt("skill_inventory_max_rows", 6);
         try {
@@ -93,8 +100,7 @@ public class HotbarController {
         }
 
         boolean unavailable = !canUseSkill(player, skill.getName());
-        if (unavailable)
-        {
+        if (unavailable) {
             nameTemplate = getMessage("skills.item_name_unavailable", "$skill");
 
             MaterialAndData disabledIcon = skill.getDisabledIcon();
@@ -121,9 +127,9 @@ public class HotbarController {
         }
 
         // Set flags and NBT data
-        NMSUtils.setMeta(item, skillKey, skill.getName());
+        NMSUtils.setMeta(item, skillNBTKey, skill.getName());
         NMSUtils.makeUnbreakable(item);
-        InventoryUtils.hideFlags(item, (byte)63);
+        InventoryUtils.hideFlags(item, (byte) 63);
 
         if (unavailable) {
             InventoryUtils.setMetaBoolean(item, "unavailable", true);
@@ -148,7 +154,7 @@ public class HotbarController {
     private String getTimeDescription(int time) {
         if (time > 0) {
             int timeInSeconds = time / 1000;
-            if (timeInSeconds > 60 * 60 ) {
+            if (timeInSeconds > 60 * 60) {
                 int hours = timeInSeconds / (60 * 60);
                 if (hours == 1) {
                     return getMessage("cooldown.description_hour");
@@ -180,8 +186,7 @@ public class HotbarController {
         if (hero == null) return;
         Skill skill = skillDescription.getSkill();
 
-        if (skill instanceof PassiveSkill)
-        {
+        if (skill instanceof PassiveSkill) {
             lore.add(getMessage("skills.passive_description", "Passive"));
         }
 
@@ -204,8 +209,7 @@ public class HotbarController {
         }
 
         int cooldown = SkillConfigManager.getUseSetting(hero, skill, SkillSetting.COOLDOWN, 0, true);
-        if (cooldown > 0)
-        {
+        if (cooldown > 0) {
             String cooldownDescription = getTimeDescription(cooldown);
             if (cooldownDescription != null && !cooldownDescription.isEmpty()) {
                 lore.add(getMessage("cooldown.description", "$time").replace("$time", cooldownDescription));
@@ -213,8 +217,7 @@ public class HotbarController {
         }
 
         int mana = SkillConfigManager.getUseSetting(hero, skill, SkillSetting.MANA, 0, true);
-        if (mana > 0)
-        {
+        if (mana > 0) {
             String manaDescription = getMessage("costs.heroes_mana").replace("$amount", Integer.toString(mana));
             lore.add(ChatColor.YELLOW + getMessage("skills.costs_description").replace("$description", manaDescription));
         }
@@ -257,8 +260,7 @@ public class HotbarController {
                 return skill1.getName().compareTo(skill2.getName());
             }
         });
-        for (String skillName : skillNames)
-        {
+        for (String skillName : skillNames) {
             Skill skill = skills.getSkill(skillName);
             if (skill == null) continue;
             int level = SkillConfigManager.getUseSetting(hero, skill, SkillSetting.LEVEL, 1, true);
@@ -267,27 +269,22 @@ public class HotbarController {
         return skillMap;
     }
 
-    private void addSkills(Hero hero, HeroClass heroClass, Collection<String> skillSet, boolean showUnuseable, boolean showPassive)
-    {
-        if (heroClass != null)
-        {
+    private void addSkills(Hero hero, HeroClass heroClass, Collection<String> skillSet, boolean showUnuseable, boolean showPassive) {
+        if (heroClass != null) {
             Set<String> classSkills = heroClass.getSkillNames();
-            for (String classSkill : classSkills)
-            {
+            for (String classSkill : classSkills) {
                 Skill skill = skills.getSkill(classSkill);
                 if (!showUnuseable && !hero.canUseSkill(skill)) continue;
                 if (!showPassive && !(skill instanceof ActiveSkill)) continue;
                 // getRaw's boolean default value is ignored! :(
-                if (SkillConfigManager.getRaw(skill, "wand", "true").equalsIgnoreCase("true"))
-                {
+                if (SkillConfigManager.getRaw(skill, "wand", "true").equalsIgnoreCase("true")) {
                     skillSet.add(classSkill);
                 }
             }
         }
     }
 
-    public List<String> getSkillList(Player player, boolean showUnuseable, boolean showPassive)
-    {
+    public List<String> getSkillList(Player player, boolean showUnuseable, boolean showPassive) {
         if (skills == null) return emptySkillList;
         Hero hero = getHero(player);
         if (hero == null) return emptySkillList;
@@ -303,12 +300,10 @@ public class HotbarController {
         Multimap<Integer, Skill> primaryMap = mapSkillsByLevel(hero, primarySkills);
         Multimap<Integer, Skill> secondaryMap = mapSkillsByLevel(hero, secondarySkills);
         List<String> skillNames = new ArrayList<>();
-        for (Skill skill : primaryMap.values())
-        {
+        for (Skill skill : primaryMap.values()) {
             skillNames.add(skill.getName());
         }
-        for (Skill skill : secondaryMap.values())
-        {
+        for (Skill skill : secondaryMap.values()) {
             skillNames.add(skill.getName());
         }
         return skillNames;
@@ -322,5 +317,36 @@ public class HotbarController {
         Hero hero = getHero(player);
         if (hero == null) return false;
         return hero.canUseSkill(skillName);
+    }
+
+    public SkillSelector getActiveSkillSelector(HumanEntity player) {
+        return selectors.get(player.getUniqueId());
+    }
+
+    public void setActiveSkillSelector(HumanEntity player, SkillSelector selector) {
+        selectors.put(player.getUniqueId(), selector);
+    }
+
+    public void clearActiveSkillSelector(HumanEntity player) {
+        selectors.remove(player.getUniqueId());
+    }
+
+    public boolean isSkill(ItemStack item) {
+        return InventoryUtils.hasMeta(item, skillNBTKey);
+    }
+
+    public boolean isLegacySkill(ItemStack item) {
+        return InventoryUtils.hasMeta(item, legacyNBTKey);
+    }
+
+    public void useSkill(Player player, ItemStack item) {
+        String skillKey = InventoryUtils.getMetaString(item, skillNBTKey);
+        if (skillKey != null && !skillKey.isEmpty()) {
+            plugin.getServer().dispatchCommand(player, "skill " + skillKey);
+        }
+    }
+
+    public Logger getLogger() {
+        return plugin.getLogger();
     }
 }

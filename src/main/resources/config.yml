@@ -8,12 +8,17 @@ skill_inventory_max_rows: 6
 # You generally should not need to change this.
 nbt_key: "heroesskill"
 
+# This is here in case you are switching out Magic for HeroesHotbar
+# When you make the switch, any existing skill items will no longer work
+# This makes sure that they disappear when dropped.
+legacy_nbt_key: "skill"
+
 # In-game text
 
 skills:
     inventory_title_heroes: "$class Skills ($page/$pages)"
     inventory_title_heroes_secondary: "$class-$class2 Skills ($page/$pages)"
-    item_name: "$skill"
+    item_name: "&6$skill"
     item_name_unavailable: "&c$skill"
     item_description: "$description"
     passive_description: "&1PASSIVE"

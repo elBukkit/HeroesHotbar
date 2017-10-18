@@ -60,13 +60,21 @@ public class HotbarPlugin extends JavaPlugin {
     protected void initialize() {
         saveDefaultConfig();
 
+        // Set up controller
         if (controller == null) {
-            controller = new HotbarController(this, (Heroes)heroesPlugin);
+            controller = new HotbarController(this, (Heroes) heroesPlugin);
         }
 
         controller.initialize();
 
+        // Set up command executors
         CommandExecutor skillsMenuCommand = new SkillsMenuCommandExecutor(controller);
         getCommand("skillmenu").setExecutor(skillsMenuCommand);
+
+        // Set up listeners
+        InventoryListener inventoryListener = new InventoryListener(controller);
+        getServer().getPluginManager().registerEvents(inventoryListener, this);
+        PlayerListener playerListener = new PlayerListener(controller);
+        getServer().getPluginManager().registerEvents(playerListener, this);
     }
 }
