@@ -1,0 +1,17 @@
+name: HeroesHotbar
+main: com.elmakers.mine.bukkit.heroes.HotbarPlugin
+version: ${project.version}
+website: http://mine.elmakers.com
+author: NathanWolf
+description : A hotbar GUI for Heroes skills
+depend: [Heroes]
+commands:
+  skillmenu:
+    description: Get Heroes skills
+    usage: /skillmenu
+    permission: Heroes.commands.skillmenu
+permissions:
+  Heroes.commands.skillmenu:
+    description: Player may use the /skillmenu command
+    type: boolean
+    default: true

@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.elmakers.mine.bukkit</groupId>
+	<artifactId>HeroesHotbar</artifactId>
+	<version>1.0-SNAPSHOT</version>
+
+	<name>Heroes Hotbar</name>
+	<description>A hotbar GUI add-on to the Heroes Bukkit plugin</description>
+
+	<packaging>jar</packaging>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<version.java>1.7</version.java>
+		<bukkit.version>1.9.2-R0.1-SNAPSHOT</bukkit.version>
+	</properties>
+
+	<licenses>
+		<license>
+		<name>MIT License</name>
+		<url>LICENSE</url>
+		</license>
+	</licenses>
+
+	<organization>
+		<name>elMakers</name>
+		<url>http://www.elmakers.com/</url>
+	</organization>
+
+	<ciManagement>
+		<system>Jenkins</system>
+		<url>http://jenkins.elmakers.com</url>
+	</ciManagement>
+
+	<scm>
+		<connection>scm:git:git@github.com:elBukkit/HeroesHotbar.git</connection>
+		<developerConnection>scm:git:git@github.com:elBukkit/HeroesHotbar.git</developerConnection>
+		<url>https://github.com/elBukkit/HeroesHotbar</url>
+		<tag>master</tag>
+	</scm>
+
+	<distributionManagement>
+		<repository>
+			<id>maven.elmakers.com</id>
+			<url>http://maven.elmakers.com/repository/</url>
+		</repository>
+		<snapshotRepository>
+			<id>maven.elmakers.com</id>
+			<url>http://maven.elmakers.com/repository/</url>
+			</snapshotRepository>
+	</distributionManagement>
+
+	<repositories>
+		<repository>
+			<id>elMakers</id>
+			<url>http://maven.elmakers.com/repository/</url>
+		</repository>
+
+		<repository>
+			<id>spigot-repo</id>
+			<url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
+		</repository>
+	</repositories>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.bukkit</groupId>
+			<artifactId>bukkit</artifactId>
+			<version>${bukkit.version}</version>
+			<scope>provided</scope>
+		</dependency>
+
+        <!-- Heroes from local jar -->
+        <dependency>
+            <groupId>com.herocraftonline.heroes</groupId>
+            <artifactId>Heroes</artifactId>
+            <version>1.8.13-SNAPSHOT</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/Heroes.jar</systemPath>
+        </dependency>
+
+		<!-- Compatibility Lib (shaded) -->
+		<dependency>
+			<groupId>com.elmakers.mine.bukkit</groupId>
+			<artifactId>CompatibilityLib</artifactId>
+			<version>1.9-1.12.1-1</version>
+			<scope>compile</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.0.2</version>
+				<configuration>
+					<source>${version.java}</source>
+					<target>${version.java}</target>
+					<compilerArgument>-Xlint:all,-serial,-fallthrough</compilerArgument>
+					<showWarnings>true</showWarnings>
+					<showDeprecation>true</showDeprecation>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>1.5</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							<relocations>
+								<relocation>
+									<pattern>com.elmakers.mine.bukkit.utility</pattern>
+									<shadedPattern>com.elmakers.mine.bukkit.heroes.utility</shadedPattern>
+								</relocation>
+							</relocations>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>
