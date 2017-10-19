@@ -23,7 +23,6 @@ public class InventoryListener implements Listener {
     public void onInventoryClick(InventoryClickEvent event) {
         ItemStack clickedItem = event.getCurrentItem();
         if (InventoryUtils.getMetaBoolean(clickedItem, "unavailable", false)) {
-            controller.getLogger().info("UNVAILABLE");
             event.setCancelled(true);
             return;
         }
@@ -40,8 +39,6 @@ public class InventoryListener implements Listener {
             }
             player.closeInventory();
             event.setCancelled(true);
-
-            controller.getLogger().info("QUICK");
             return;
         }
 
@@ -50,7 +47,6 @@ public class InventoryListener implements Listener {
         boolean heldSkill = controller.isSkill(heldItem);
         if (heldSkill && event.getSlotType() == InventoryType.SlotType.ARMOR) {
             event.setCancelled(true);
-            controller.getLogger().info("ARMOR");
             return;
         }
 
@@ -60,7 +56,6 @@ public class InventoryListener implements Listener {
             ItemStack item = player.getInventory().getItem(slot);
             if (item != null && controller.isSkill(item)) {
                 event.setCancelled(true);
-                controller.getLogger().info("ARMOR2");
                 return;
             }
         }

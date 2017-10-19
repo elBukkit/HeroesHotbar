@@ -1,7 +1,6 @@
-# 1.0
-
- - Functional parity with Magic's Heroes integration hotbar.
 
 # 1.1
+ 
+# 1.0
 
- - Add support for prepared skills
+ - Functional parity with Magic's Heroes integration hotbar. (Mostly...)
