@@ -1,4 +1,6 @@
 
+# 1.2
+
 # 1.1
 
  - Add live hotbar countdown for cooldowns and mana
