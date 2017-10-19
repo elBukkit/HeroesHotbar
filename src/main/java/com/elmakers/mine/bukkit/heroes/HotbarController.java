@@ -52,6 +52,7 @@ public class HotbarController {
     private String legacyNBTKey;
     private int skillInventoryRows;
     private MaterialAndData defaultSkillIcon;
+    private String defaultDisabledIconURL;
 
     private Map<UUID, SkillSelector> selectors = new HashMap<>();
 
@@ -68,6 +69,7 @@ public class HotbarController {
             skillNBTKey = "heroesskill";
         }
         legacyNBTKey = config.getString("legacy_nbt_key");
+        defaultDisabledIconURL = config.getString("disabled_icon_url");
 
         skillInventoryRows = config.getInt("skill_inventory_max_rows", 6);
         try {
@@ -108,7 +110,10 @@ public class HotbarController {
                 icon = disabledIcon;
             }
             String disabledIconURL = skill.getDisabledIconURL();
-            if (disabledIconURL != null) {
+            if (disabledIconURL == null) {
+                disabledIconURL = defaultDisabledIconURL;
+            }
+            if (disabledIconURL != null && !disabledIconURL.isEmpty()) {
                 iconURL = disabledIconURL;
             }
         } else {
