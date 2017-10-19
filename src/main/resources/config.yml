@@ -16,6 +16,11 @@ legacy_nbt_key: "skill"
 # Default disabled icon url. Set to "" to turn off disabled icons, or override on a per-skill basis.
 disabled_icon_url: http://textures.minecraft.net/texture/1c28376acb23cd93322c0a5d569b48b7cd631a6d65dd4f226adb9e9dd7e5c
 
+# How often to scan each player's hotbar to update countdown timers
+# This value is in ticks, so 20 would be once per second. Default is once per half second.
+# Set to 0 to disable the cooldown timers.
+update_interval: 10
+
 # In-game text
 
 skills:

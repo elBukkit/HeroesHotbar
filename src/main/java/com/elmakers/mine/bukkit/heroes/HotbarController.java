@@ -18,6 +18,7 @@ import com.herocraftonline.heroes.characters.skill.SkillManager;
 import com.herocraftonline.heroes.characters.skill.SkillSetting;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.Server;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
@@ -78,6 +79,12 @@ public class HotbarController {
             plugin.getLogger().warning("Invalid icon in config: " + config.getString("default_skill_icon"));
             defaultSkillIcon = new MaterialAndData(Material.STICK);
         }
+
+        int hotbarUpdateInterval = config.getInt("update_interval");
+        if (hotbarUpdateInterval > 0) {
+            final HotbarUpdateTask updateTask = new HotbarUpdateTask(this);
+            plugin.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, updateTask, 0, hotbarUpdateInterval);
+        }
     }
 
     public void clear() {
@@ -110,9 +117,6 @@ public class HotbarController {
                 icon = disabledIcon;
             }
             String disabledIconURL = skill.getDisabledIconURL();
-            if (disabledIconURL == null) {
-                disabledIconURL = defaultDisabledIconURL;
-            }
             if (disabledIconURL != null && !disabledIconURL.isEmpty()) {
                 iconURL = disabledIconURL;
             }
@@ -345,13 +349,29 @@ public class HotbarController {
     }
 
     public void useSkill(Player player, ItemStack item) {
-        String skillKey = InventoryUtils.getMetaString(item, skillNBTKey);
+        String skillKey = getSkillKey(item);
         if (skillKey != null && !skillKey.isEmpty()) {
             plugin.getServer().dispatchCommand(player, "skill " + skillKey);
         }
     }
 
+    public String getSkillKey(ItemStack item) {
+        return InventoryUtils.getMetaString(item, skillNBTKey);
+    }
+
     public Logger getLogger() {
         return plugin.getLogger();
+    }
+
+    public Plugin getPlugin() {
+        return plugin;
+    }
+
+    public Server getServer() {
+        return plugin.getServer();
+    }
+
+    public String getDefaultDisabledIconURL() {
+        return defaultDisabledIconURL;
     }
 }

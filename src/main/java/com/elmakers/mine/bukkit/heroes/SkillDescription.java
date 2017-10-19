@@ -37,6 +37,11 @@ public class SkillDescription implements Comparable<SkillDescription> {
         }
 
         this.disabledIcon = iconDisabled == null || iconDisabled.isEmpty() ? null : new MaterialAndData(iconDisabled);
+
+        if (iconDisabledURL == null) {
+            iconDisabledURL = controller.getDefaultDisabledIconURL();
+        }
+
         this.disabledIconURL = iconDisabledURL;
 
         String skillDisplayName = SkillConfigManager.getRaw(skill, "name", skill.getName());
