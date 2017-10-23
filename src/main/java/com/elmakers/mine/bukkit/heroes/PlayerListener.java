@@ -1,10 +1,12 @@
 package com.elmakers.mine.bukkit.heroes;
 
+import com.elmakers.mine.bukkit.utility.NMSUtils;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
@@ -56,6 +58,16 @@ public class PlayerListener implements Listener {
         if (isSkill) {
             controller.useSkill(player, next);
             event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onBlockPlace(BlockPlaceEvent event)
+    {
+        ItemStack itemStack = event.getItemInHand();
+        if (controller.isSkill(itemStack) || controller.isLegacySkill(itemStack)) {
+            event.setCancelled(true);
+            return;
         }
     }
 }
