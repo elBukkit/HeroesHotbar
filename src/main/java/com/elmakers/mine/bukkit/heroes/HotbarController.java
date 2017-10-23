@@ -140,7 +140,8 @@ public class HotbarController {
         NMSUtils.makeUnbreakable(item);
         InventoryUtils.hideFlags(item, (byte) 63);
 
-        if (unavailable) {
+        boolean passive = skill.getSkill() instanceof PassiveSkill;
+        if (unavailable || passive) {
             InventoryUtils.setMetaBoolean(item, "unavailable", true);
         }
 

@@ -1,6 +1,5 @@
 package com.elmakers.mine.bukkit.heroes;
 
-import com.elmakers.mine.bukkit.utility.NMSUtils;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
