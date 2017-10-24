@@ -5,7 +5,7 @@
 
 	<groupId>com.elmakers.mine.bukkit</groupId>
 	<artifactId>HeroesHotbar</artifactId>
-	<version>1.2</version>
+	<version>1.3-SNAPSHOT</version>
 
 	<name>Heroes Hotbar</name>
 	<description>A hotbar GUI add-on to the Heroes Bukkit plugin</description>
@@ -14,7 +14,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<version.java>1.7</version.java>
+		<version.java>1.8</version.java>
 		<bukkit.version>1.9.2-R0.1-SNAPSHOT</bukkit.version>
 	</properties>
 
