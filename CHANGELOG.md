@@ -1,4 +1,9 @@
 
+# 1.3
+
+ - Now requires a dev build of Heroes
+ - Add support for skills memorization, prepared skills
+
 # 1.2
 
  - Fix being able to place skills as blocks when skull or block icons are used.

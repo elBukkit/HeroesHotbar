@@ -32,10 +32,11 @@ skills:
     passive_description: "&1PASSIVE"
     none: "You have no skills!"
     none_on_page: "There are no skills on page $page"
-    level_description: Level $level
-    costs_description: Consumes $description
+    level_description: "&6Level $level"
+    costs_description: "&eConsumes $description"
     description: "&a&o$description"
     description_extra: "&2&o$description"
+    prepared_lore: "&3Memorize cost: &b$points"
 
 cooldown:
     wait_seconds: another $seconds seconds

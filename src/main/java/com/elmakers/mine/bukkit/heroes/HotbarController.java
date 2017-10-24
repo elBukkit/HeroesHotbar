@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
@@ -198,13 +199,19 @@ public class HotbarController {
 
         if (skill instanceof PassiveSkill) {
             lore.add(getMessage("skills.passive_description", "Passive"));
+        } else {
+            OptionalInt preparedPoints = hero.getSkillPrepareCost(skill);
+            if (preparedPoints.isPresent()) {
+                String costTemplate = getMessage("skills.prepared_lore", "Prepared cost: $points");
+                lore.add(costTemplate.replace("$points", Integer.toString(preparedPoints.getAsInt())));
+            }
         }
 
         int level = SkillConfigManager.getUseSetting(hero, skill, SkillSetting.LEVEL, 1, true);
 
         String levelDescription = getMessage("skills.level_description", "").replace("$level", Integer.toString(level));
         if (levelDescription != null && levelDescription.length() > 0) {
-            lore.add(ChatColor.GOLD + levelDescription);
+            lore.add(levelDescription);
         }
         String description = skill.getDescription(hero);
         if (description != null && description.length() > 0) {
@@ -229,7 +236,7 @@ public class HotbarController {
         int mana = SkillConfigManager.getUseSetting(hero, skill, SkillSetting.MANA, 0, true);
         if (mana > 0) {
             String manaDescription = getMessage("costs.heroes_mana").replace("$amount", Integer.toString(mana));
-            lore.add(ChatColor.YELLOW + getMessage("skills.costs_description").replace("$description", manaDescription));
+            lore.add(getMessage("skills.costs_description").replace("$description", manaDescription));
         }
     }
 
@@ -257,7 +264,7 @@ public class HotbarController {
     public String getSecondaryClassName(Player player) {
         Hero hero = getHero(player);
         if (hero == null) return "";
-        HeroClass heroClass = hero.getSecondClass();
+        HeroClass heroClass = hero.getSecondaryClass();
         if (heroClass == null) return "";
         return heroClass.getName();
     }
@@ -300,7 +307,7 @@ public class HotbarController {
         if (hero == null) return emptySkillList;
 
         HeroClass heroClass = hero.getHeroClass();
-        HeroClass secondClass = hero.getSecondClass();
+        HeroClass secondClass = hero.getSecondaryClass();
         Set<String> primarySkills = new HashSet<>();
         Set<String> secondarySkills = new HashSet<>();
         addSkills(hero, heroClass, primarySkills, showUnuseable, showPassive);
