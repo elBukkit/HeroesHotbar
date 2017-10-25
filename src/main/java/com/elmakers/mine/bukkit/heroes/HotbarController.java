@@ -22,6 +22,7 @@ import org.bukkit.Server;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
@@ -397,6 +398,15 @@ public class HotbarController {
             Hero hero = getHero(player);
             hero.unprepareSkill(getSkill(skillKey));
             CompatibilityUtils.setDisplayName(item, getSkillTitle(player, skillKey));
+
+            Inventory inventory = player.getInventory();
+            for (int i = 0; i < inventory.getSize(); i++) {
+                ItemStack slotItem = inventory.getItem(i);
+                String slotKey = getSkillKey(slotItem);
+                if (slotKey != null && slotKey.equals(skillKey)) {
+                    inventory.setItem(i, null);
+                }
+            }
         }
     }
 
