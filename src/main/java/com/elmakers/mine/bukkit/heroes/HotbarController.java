@@ -457,4 +457,14 @@ public class HotbarController {
     public String getDefaultDisabledIconURL() {
         return defaultDisabledIconURL;
     }
+
+    public void delayedInventoryUpdate(final Player player) {
+        plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
+            @SuppressWarnings("deprecation")
+            @Override
+            public void run() {
+                player.updateInventory();
+            }
+        }, 1);
+    }
 }

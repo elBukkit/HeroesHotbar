@@ -80,10 +80,14 @@ public class InventoryListener implements Listener {
         }
 
         // Clicking a skill prepares it
-        if (event.getAction() == InventoryAction.PICKUP_ALL || isHotbar || event.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
+        boolean isMove = event.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY;
+        if (event.getAction() == InventoryAction.PICKUP_ALL || isHotbar || isMove) {
             if (player instanceof Player) {
                 if (!controller.prepareSkill((Player) player, clickedItem)) {
                     event.setCancelled(true);
+                } else if (isMove) {
+                    // This is needed for the item name and lore to update when shift+clicking
+                    controller.delayedInventoryUpdate((Player)player);
                 }
             }
             return;
