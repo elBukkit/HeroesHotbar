@@ -1,8 +1,15 @@
 
 # 1.3
 
- - Now requires a dev build of Heroes
+ - Now requires Heroes 1.8.13 or higher
  - Add support for skills memorization, prepared skills
+   - If the skill is UNLEARNED - left click gives a msg (This skill must be learned before using!)
+   - If the skill is LEARNED (or just granted through level) but UNPREPARED, left clicking it will PREPARE the skill and allow it to be dragged to the hotbar IF its within the PREPARE Skill Limit or Point Limit.
+   - If the PREPARE limit (point etc) is reached, left clicking will kick a message "You cannot prepare any more skills, RIGHT click a skill to unprepare it)
+   - Right-clicking the skill in the menu will UNPREPARE the skill and turn it red again
+   - Unprepared skills are orange
+   - Prepared skills are normal colorized/icon
+   - Unlearned/cant use skills are red
 
 # 1.2
 

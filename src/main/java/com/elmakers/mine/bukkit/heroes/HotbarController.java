@@ -93,26 +93,39 @@ public class HotbarController {
     }
 
     public String getMessage(String key) {
-        return plugin.getConfig().getString(key, "");
+        return getMessage(key, "");
     }
 
     public String getMessage(String key, String defaultValue) {
         return ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString(key, defaultValue));
     }
 
+    public String getSkillTitle(Player player, String skillName) {
+        String nameTemplate;
+
+        boolean unavailable = !canUseSkill(player, skillName);
+        boolean unprepared = !isPrepared(player, skillName);
+        if (unavailable) {
+            nameTemplate = getMessage("skills.item_name_unavailable", "$skill");
+        } else if (unprepared) {
+            nameTemplate = getMessage("skills.item_name_unprepared", "$skill");
+        } else {
+            nameTemplate = getMessage("skills.item_name", "$skill");
+        }
+
+        return nameTemplate.replace("$skill", skillName);
+    }
+
     public ItemStack createSkillItem(SkillDescription skill, Player player) {
         ItemStack item = null;
         MaterialAndData icon = skill.getIcon();
         String iconURL = skill.getIconURL();
-        String nameTemplate;
         if (icon == null) {
             icon = defaultSkillIcon;
         }
 
         boolean unavailable = !canUseSkill(player, skill.getName());
         if (unavailable) {
-            nameTemplate = getMessage("skills.item_name_unavailable", "$skill");
-
             MaterialAndData disabledIcon = skill.getDisabledIcon();
             if (disabledIcon != null) {
                 icon = disabledIcon;
@@ -121,8 +134,6 @@ public class HotbarController {
             if (disabledIconURL != null && !disabledIconURL.isEmpty()) {
                 iconURL = disabledIconURL;
             }
-        } else {
-            nameTemplate = getMessage("skills.item_name", "$skill");
         }
 
         if (iconURL != null && !iconURL.isEmpty()) {
@@ -142,12 +153,15 @@ public class HotbarController {
         InventoryUtils.hideFlags(item, (byte) 63);
 
         boolean passive = skill.getSkill() instanceof PassiveSkill;
-        if (unavailable || passive) {
+        if (unavailable) {
             InventoryUtils.setMetaBoolean(item, "unavailable", true);
+        }
+        if (passive) {
+            InventoryUtils.setMetaBoolean(item, "passive", true);
         }
 
         // Set display name
-        CompatibilityUtils.setDisplayName(item, nameTemplate.replace("$skill", skill.getName()));
+        CompatibilityUtils.setDisplayName(item, getSkillTitle(player, skill.getName()));
 
         // Set lore
         List<String> lore = new ArrayList<>();
@@ -219,11 +233,14 @@ public class HotbarController {
             InventoryUtils.wrapText(description, MAX_LORE_LENGTH, lore);
         }
 
+        /*
+        // This looks like it just generates redundant lore?
         description = skillDescription.getDescription();
         if (description != null && description.length() > 0) {
             description = getMessage("skills.description_extra", "$description").replace("$description", description);
             InventoryUtils.wrapText(description, MAX_LORE_LENGTH, lore);
         }
+        */
 
         int cooldown = SkillConfigManager.getUseSetting(hero, skill, SkillSetting.COOLDOWN, 0, true);
         if (cooldown > 0) {
@@ -333,7 +350,13 @@ public class HotbarController {
     public boolean canUseSkill(Player player, String skillName) {
         Hero hero = getHero(player);
         if (hero == null) return false;
-        return hero.canUseSkill(skillName);
+        return hero.canUseSkill(skillName, true);
+    }
+
+    public boolean isPrepared(Player player, String skillName) {
+        Hero hero = getHero(player);
+        if (hero == null) return false;
+        return hero.isSkillPrepared(skillName) || !hero.getSkillPrepareCost(skillName).isPresent();
     }
 
     public SkillSelector getActiveSkillSelector(HumanEntity player) {
@@ -361,6 +384,47 @@ public class HotbarController {
         if (skillKey != null && !skillKey.isEmpty()) {
             plugin.getServer().dispatchCommand(player, "skill " + skillKey);
         }
+    }
+
+    public void unprepareSkill(Player player, ItemStack item) {
+        String skillKey = getSkillKey(item);
+        if (skillKey != null && !skillKey.isEmpty()) {
+            Hero hero = getHero(player);
+            hero.unprepareSkill(getSkill(skillKey));
+            CompatibilityUtils.setDisplayName(item, getSkillTitle(player, skillKey));
+        }
+    }
+
+    public boolean prepareSkill(Player player, ItemStack item) {
+        String skillKey = getSkillKey(item);
+        if (skillKey != null && !skillKey.isEmpty()) {
+            Skill skill = getSkill(skillKey);
+            Hero hero = getHero(player);
+            OptionalInt preparedPoints = hero.getSkillPrepareCost(skill);
+            if (preparedPoints.isPresent()) {
+                if (!hero.isSkillPrepared(skillKey)) {
+                    int usedPoints = hero.getUsedSkillPreparePoints();
+                    int maxPoints = hero.getTotalSkillPreparePoints();
+                    int maxPrepared = hero.getPreparedSkillLimit();
+                    int currentPrepared = hero.getPreparedSkillCount();
+                    if (currentPrepared + 1 > maxPrepared || usedPoints + preparedPoints.getAsInt() > maxPoints) {
+                        player.sendMessage(getMessage("skills.prepare_limit"));
+                        return false;
+                    } else {
+                        hero.prepareSkill(skillKey);
+                        CompatibilityUtils.setDisplayName(item, getSkillTitle(player, skillKey));
+
+                        int remainingPoints = maxPoints - usedPoints - preparedPoints.getAsInt();
+                        int remainingSlots = maxPrepared - currentPrepared - 1;
+                        player.sendMessage(getMessage("skills.prepared")
+                            .replace("$skill", skillKey)
+                            .replace("$points", Integer.toString(remainingPoints))
+                            .replace("$slots", Integer.toString(remainingSlots)));
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     public String getSkillKey(ItemStack item) {

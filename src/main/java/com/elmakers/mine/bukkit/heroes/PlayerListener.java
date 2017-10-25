@@ -29,6 +29,10 @@ public class PlayerListener implements Listener {
     public void onPlayerDropItem(PlayerDropItemEvent event) {
         final Player player = event.getPlayer();
 
+        // Unprepare skills when dropped
+        ItemStack droppedItem = event.getItemDrop().getItemStack();
+        controller.unprepareSkill(player, droppedItem);
+
         // Catch lag-related glitches dropping items from GUIs
         SkillSelector selector = controller.getActiveSkillSelector(player);
         if (selector != null) {

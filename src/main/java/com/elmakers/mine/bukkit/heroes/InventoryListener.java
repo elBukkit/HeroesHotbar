@@ -22,23 +22,42 @@ public class InventoryListener implements Listener {
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         ItemStack clickedItem = event.getCurrentItem();
+        HumanEntity player = event.getWhoClicked();
+
         if (InventoryUtils.getMetaBoolean(clickedItem, "unavailable", false)) {
+            event.setCancelled(true);
+            player.sendMessage(controller.getMessage("skills.unlearned").replace("$skill", controller.getSkillKey(clickedItem)));
+            return;
+        }
+        if (InventoryUtils.getMetaBoolean(clickedItem, "passive", false)) {
             event.setCancelled(true);
             return;
         }
 
         boolean isSkill = clickedItem != null && controller.isSkill(clickedItem);
-        HumanEntity player = event.getWhoClicked();
+        boolean isDrop = event.getClick() == ClickType.DROP || event.getClick() == ClickType.CONTROL_DROP;
         InventoryAction action = event.getAction();
 
-        // Check for right-click-to-use
+        // Check for right-click-to-prepare
         boolean isRightClick = action == InventoryAction.PICKUP_HALF;
         if (isSkill && isRightClick) {
             if (player instanceof Player) {
-                controller.useSkill((Player) player, clickedItem);
+                controller.unprepareSkill((Player) player, clickedItem);
             }
-            player.closeInventory();
             event.setCancelled(true);
+            return;
+        }
+
+        // Drop key unprepares
+        if (isSkill && isDrop) {
+            if (player instanceof Player) {
+                controller.unprepareSkill((Player) player, clickedItem);
+            }
+
+            // Only cancel event if in the skill selector
+            if (controller.getActiveSkillSelector(player) != null) {
+                event.setCancelled(true);
+            }
             return;
         }
 
@@ -60,6 +79,16 @@ public class InventoryListener implements Listener {
             }
         }
 
+        // Clicking a skill prepares it
+        if (event.getAction() == InventoryAction.PICKUP_ALL || isHotbar || event.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
+            if (player instanceof Player) {
+                if (!controller.prepareSkill((Player) player, clickedItem)) {
+                    event.setCancelled(true);
+                }
+            }
+            return;
+        }
+
         // Delegate to skill selector
         SkillSelector skillSelector = controller.getActiveSkillSelector(event.getWhoClicked());
         if (skillSelector != null) {
@@ -70,7 +99,6 @@ public class InventoryListener implements Listener {
         // Preventing putting skills in containers
         InventoryType inventoryType = event.getInventory().getType();
         boolean isPlayerInventory = inventoryType == InventoryType.CRAFTING || inventoryType == InventoryType.PLAYER;
-        boolean isDrop = event.getClick() == ClickType.DROP || event.getClick() == ClickType.CONTROL_DROP;
         isSkill = isSkill || controller.isLegacySkill(clickedItem);
         if (isSkill && !isPlayerInventory) {
             if (!isDrop) {

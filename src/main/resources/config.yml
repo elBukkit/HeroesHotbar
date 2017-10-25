@@ -28,6 +28,7 @@ skills:
     inventory_title_heroes_secondary: "$class-$class2 Skills ($page/$pages)"
     item_name: "&6$skill"
     item_name_unavailable: "&c$skill"
+    item_name_unprepared: "&e$skill"
     item_description: "$description"
     passive_description: "&1PASSIVE"
     none: "You have no skills!"
@@ -37,6 +38,9 @@ skills:
     description: "&a&o$description"
     description_extra: "&2&o$description"
     prepared_lore: "&3Memorize cost: &b$points"
+    unlearned: "&cThe $skill skill must be learned before using!"
+    prepare_limit: "&cYou cannot prepare any more skills, right-click a skill to unprepare it"
+    prepared: "&bYou prepared &3$skill, &e$points &bpoints and &e$slots slots remaining"
 
 cooldown:
     wait_seconds: another $seconds seconds
