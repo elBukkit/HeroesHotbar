@@ -40,7 +40,8 @@ skills:
     prepared_lore: "&3Memorize cost: &b$points"
     unlearned: "&cThe $skill skill must be learned before using!"
     prepare_limit: "&cYou cannot prepare any more skills, right-click a skill to unprepare it"
-    prepared: "&bYou prepared &3$skill, &e$points &bpoints and &e$slots slots remaining"
+    prepared: "&bYou prepared &3$skill, &e$points &bpoints and &e$slots &bslots remaining"
+    unprepared: "&2You unprepared &3$skill, &e$points &2points and &e$slots &2slots available"
     unprepare_lore: "&bRight-click or drop to unprepare"
 
 cooldown:

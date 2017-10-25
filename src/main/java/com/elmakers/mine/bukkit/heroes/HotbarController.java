@@ -396,10 +396,9 @@ public class HotbarController {
     public void unprepareSkill(Player player, ItemStack item) {
         String skillKey = getSkillKey(item);
         if (skillKey != null && !skillKey.isEmpty()) {
-            Hero hero = getHero(player);
-            hero.unprepareSkill(getSkill(skillKey));
-            CompatibilityUtils.setDisplayName(item, getSkillTitle(player, skillKey));
 
+            // Always take all of the items away here, players can use this to
+            // "unprepare" skills that don't need preparing just to clean them out of their inventory.
             Inventory inventory = player.getInventory();
             for (int i = 0; i < inventory.getSize(); i++) {
                 ItemStack slotItem = inventory.getItem(i);
@@ -407,6 +406,29 @@ public class HotbarController {
                 if (slotKey != null && slotKey.equals(skillKey)) {
                     inventory.setItem(i, null);
                 }
+            }
+
+            // Make sure this skill can be unprepared
+            Hero hero = getHero(player);
+            Skill skill = getSkill(skillKey);
+            OptionalInt preparedPoints = hero.getSkillPrepareCost(skill);
+            if (preparedPoints.isPresent() && hero.isSkillPrepared(skillKey)) {
+                // Unprepare it, update item name
+                // lore is not updated here, it could be but doesn't seem that important.
+                hero.unprepareSkill(skill);
+                CompatibilityUtils.setDisplayName(item, getSkillTitle(player, skillKey));
+
+                // Message the player
+                int usedPoints = hero.getUsedSkillPreparePoints();
+                int maxPoints = hero.getTotalSkillPreparePoints();
+                int maxPrepared = hero.getPreparedSkillLimit();
+                int currentPrepared = hero.getPreparedSkillCount();
+                int remainingPoints = maxPoints - usedPoints;
+                int remainingSlots = maxPrepared - currentPrepared;
+                player.sendMessage(getMessage("skills.unprepared")
+                    .replace("$skill", skillKey)
+                    .replace("$points", Integer.toString(remainingPoints))
+                    .replace("$slots", Integer.toString(remainingSlots)));
             }
         }
     }
