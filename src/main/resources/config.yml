@@ -41,6 +41,7 @@ skills:
     unlearned: "&cThe $skill skill must be learned before using!"
     prepare_limit: "&cYou cannot prepare any more skills, right-click a skill to unprepare it"
     prepared: "&bYou prepared &3$skill, &e$points &bpoints and &e$slots slots remaining"
+    unprepare_lore: "&bRight-click or drop to unprepare"
 
 cooldown:
     wait_seconds: another $seconds seconds
@@ -60,5 +61,5 @@ cooldown:
     description: "&eCooldown: &6$time"
 
 costs:
-    heroes_mana: $amount Mana
+    heroes_mana: "&6$amount &eMana"
 

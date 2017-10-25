@@ -1,6 +1,8 @@
 
 # 1.4
 
+ - Add instructional lore on prepared skills for unpreparing
+
 # 1.3
 
  - Now requires Heroes 1.8.13 or higher

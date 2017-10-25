@@ -23,6 +23,7 @@ import org.bukkit.configuration.Configuration;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 
 import java.text.DecimalFormat;
@@ -211,10 +212,10 @@ public class HotbarController {
         if (hero == null) return;
         Skill skill = skillDescription.getSkill();
 
+        OptionalInt preparedPoints = hero.getSkillPrepareCost(skill);
         if (skill instanceof PassiveSkill) {
             lore.add(getMessage("skills.passive_description", "Passive"));
         } else {
-            OptionalInt preparedPoints = hero.getSkillPrepareCost(skill);
             if (preparedPoints.isPresent()) {
                 String costTemplate = getMessage("skills.prepared_lore", "Prepared cost: $points");
                 lore.add(costTemplate.replace("$points", Integer.toString(preparedPoints.getAsInt())));
@@ -254,6 +255,10 @@ public class HotbarController {
         if (mana > 0) {
             String manaDescription = getMessage("costs.heroes_mana").replace("$amount", Integer.toString(mana));
             lore.add(getMessage("skills.costs_description").replace("$description", manaDescription));
+        }
+
+        if (preparedPoints.isPresent() && isPrepared(player, skill.getName())) {
+            lore.add(getMessage("skills.unprepare_lore"));
         }
     }
 
@@ -420,6 +425,12 @@ public class HotbarController {
                             .replace("$skill", skillKey)
                             .replace("$points", Integer.toString(remainingPoints))
                             .replace("$slots", Integer.toString(remainingSlots)));
+
+                        ItemMeta itemMeta = item.getItemMeta();
+                        List<String> lore = itemMeta.getLore();
+                        lore.add(getMessage("skills.unprepare_lore"));
+                        itemMeta.setLore(lore);
+                        item.setItemMeta(itemMeta);
                     }
                 }
             }
