@@ -11,6 +11,7 @@ import com.herocraftonline.heroes.characters.CharacterManager;
 import com.herocraftonline.heroes.characters.Hero;
 import com.herocraftonline.heroes.characters.classes.HeroClass;
 import com.herocraftonline.heroes.characters.skill.ActiveSkill;
+import com.herocraftonline.heroes.characters.skill.OutsourcedSkill;
 import com.herocraftonline.heroes.characters.skill.PassiveSkill;
 import com.herocraftonline.heroes.characters.skill.Skill;
 import com.herocraftonline.heroes.characters.skill.SkillConfigManager;
@@ -154,7 +155,7 @@ public class HotbarController {
         NMSUtils.makeUnbreakable(item);
         InventoryUtils.hideFlags(item, (byte) 63);
 
-        boolean passive = skill.getSkill() instanceof PassiveSkill;
+        boolean passive = skill.getSkill() instanceof PassiveSkill || skill.getSkill() instanceof OutsourcedSkill;
         if (unavailable) {
             InventoryUtils.setMetaBoolean(item, "unavailable", true);
         }
