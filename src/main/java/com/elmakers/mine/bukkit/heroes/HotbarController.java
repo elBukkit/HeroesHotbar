@@ -398,13 +398,17 @@ public class HotbarController {
         if (skillKey != null && !skillKey.isEmpty()) {
 
             // Always take all of the items away here, players can use this to
-            // "unprepare" skills that don't need preparing just to clean them out of their inventory.
-            Inventory inventory = player.getInventory();
-            for (int i = 0; i < inventory.getSize(); i++) {
-                ItemStack slotItem = inventory.getItem(i);
-                String slotKey = getSkillKey(slotItem);
-                if (slotKey != null && slotKey.equals(skillKey)) {
-                    inventory.setItem(i, null);
+            // "unprepare" skills that don't need preparing just to clean them out of their inventory
+            // Only do this if the skill selector is active.
+            SkillSelector activeSelector = getActiveSkillSelector(player);
+            if (activeSelector != null) {
+                Inventory inventory = player.getInventory();
+                for (int i = 0; i < inventory.getSize(); i++) {
+                    ItemStack slotItem = inventory.getItem(i);
+                    String slotKey = getSkillKey(slotItem);
+                    if (slotKey != null && slotKey.equals(skillKey)) {
+                        inventory.setItem(i, null);
+                    }
                 }
             }
 
