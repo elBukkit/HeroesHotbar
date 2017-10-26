@@ -437,6 +437,18 @@ public class HotbarController {
         }
     }
 
+    public boolean hasSkillItem(Player player, String skillKey) {
+        Inventory inventory = player.getInventory();
+        for (int i = 0; i < inventory.getSize(); i++) {
+            ItemStack slotItem = inventory.getItem(i);
+            String slotKey = getSkillKey(slotItem);
+            if (slotKey != null && slotKey.equals(skillKey)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public boolean prepareSkill(Player player, ItemStack item) {
         String skillKey = getSkillKey(item);
         if (skillKey != null && !skillKey.isEmpty()) {

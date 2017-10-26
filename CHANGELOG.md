@@ -2,6 +2,8 @@
 # 1.4
 
  - Add instructional lore on prepared skills for unpreparing
+ - Add chat message when unpreparing
+ - Don't allow taking items out of the skill selector that area already in your inventory
 
 # 1.3
 

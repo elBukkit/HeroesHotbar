@@ -37,6 +37,7 @@ public class InventoryListener implements Listener {
         boolean isSkill = clickedItem != null && controller.isSkill(clickedItem);
         boolean isDrop = event.getClick() == ClickType.DROP || event.getClick() == ClickType.CONTROL_DROP;
         InventoryAction action = event.getAction();
+        SkillSelector skillSelector = controller.getActiveSkillSelector(event.getWhoClicked());
 
         // Check for right-click-to-prepare
         boolean isRightClick = action == InventoryAction.PICKUP_HALF;
@@ -55,7 +56,7 @@ public class InventoryListener implements Listener {
             }
 
             // Only cancel event if in the skill selector
-            if (controller.getActiveSkillSelector(player) != null) {
+            if (skillSelector != null) {
                 event.setCancelled(true);
             }
             return;
@@ -80,6 +81,7 @@ public class InventoryListener implements Listener {
         }
 
         // Clicking a skill prepares it
+
         boolean isMove = event.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY;
         if (event.getAction() == InventoryAction.PICKUP_ALL || isHotbar || isMove) {
             if (player instanceof Player) {
@@ -89,12 +91,17 @@ public class InventoryListener implements Listener {
                     // This is needed for the item name and lore to update when shift+clicking
                     controller.delayedInventoryUpdate((Player)player);
                 }
+
+                // Just prepare but don't grab, if the skill inventory is open and we already have this skill
+                if (!event.isCancelled() && skillSelector != null && controller.hasSkillItem((Player)player, controller.getSkillKey(clickedItem))) {
+                    event.setCancelled(true);
+                }
             }
+
             return;
         }
 
         // Delegate to skill selector
-        SkillSelector skillSelector = controller.getActiveSkillSelector(event.getWhoClicked());
         if (skillSelector != null) {
             skillSelector.onClick(event);
             return;
