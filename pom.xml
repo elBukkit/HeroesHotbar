@@ -5,7 +5,7 @@
 
 	<groupId>com.elmakers.mine.bukkit</groupId>
 	<artifactId>HeroesHotbar</artifactId>
-	<version>1.6-SNAPSHOT</version>
+	<version>1.6</version>
 
 	<name>Heroes Hotbar</name>
 	<description>A hotbar GUI add-on to the Heroes Bukkit plugin</description>
