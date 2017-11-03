@@ -20,8 +20,8 @@ public class SkillDescription implements Comparable<SkillDescription> {
         this.skillKey = skillKey;
         this.skillLevel = controller.getSkillLevel(player, skillKey);
 
-        String iconURL = SkillConfigManager.getRaw(skill, "icon-url", SkillConfigManager.getRaw(skill, "icon_url", null));
-        String icon = SkillConfigManager.getRaw(skill, "icon", null);
+        String iconURL = skill == null ? null : SkillConfigManager.getRaw(skill, "icon-url", SkillConfigManager.getRaw(skill, "icon_url", null));
+        String icon = skill == null ? null : SkillConfigManager.getRaw(skill, "icon", null);
         if (icon != null && icon.startsWith("http://")) {
             icon = null;
             iconURL = icon;
@@ -29,8 +29,8 @@ public class SkillDescription implements Comparable<SkillDescription> {
         this.icon = icon == null || icon.isEmpty() ? null : new MaterialAndData(icon);
         this.iconURL = iconURL;
 
-        String iconDisabledURL = SkillConfigManager.getRaw(skill, "icon-disabled-url", SkillConfigManager.getRaw(skill, "icon_disabled_url", null));
-        String iconDisabled = SkillConfigManager.getRaw(skill, "icon-disabled", SkillConfigManager.getRaw(skill, "icon_disabled", null));
+        String iconDisabledURL = skill == null ? null : SkillConfigManager.getRaw(skill, "icon-disabled-url", SkillConfigManager.getRaw(skill, "icon_disabled_url", null));
+        String iconDisabled = skill == null ? null : SkillConfigManager.getRaw(skill, "icon-disabled", SkillConfigManager.getRaw(skill, "icon_disabled", null));
         if (iconDisabled != null && iconDisabled.startsWith("http://")) {
             iconDisabled = null;
             iconDisabledURL = icon;
@@ -44,9 +44,9 @@ public class SkillDescription implements Comparable<SkillDescription> {
 
         this.disabledIconURL = iconDisabledURL;
 
-        String skillDisplayName = SkillConfigManager.getRaw(skill, "name", skill.getName());
+        String skillDisplayName = skill == null ? null : SkillConfigManager.getRaw(skill, "name", skill.getName());
         this.name = skillDisplayName == null || skillDisplayName.isEmpty() ? skillKey : skillDisplayName;
-        this.description = SkillConfigManager.getRaw(skill, "description", "");
+        this.description = skill == null ? null : SkillConfigManager.getRaw(skill, "description", "");
     }
 
     public boolean isHeroes() {
@@ -87,5 +87,9 @@ public class SkillDescription implements Comparable<SkillDescription> {
 
     public String getDescription() {
         return description;
+    }
+
+    public boolean isValid() {
+        return skill != null;
     }
 };

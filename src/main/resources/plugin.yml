@@ -10,8 +10,16 @@ commands:
     description: Get Heroes skills
     usage: /skillmenu
     permission: Heroes.commands.skillmenu
+  giveskill:
+    description: Give a specific skill item to a player
+    usage: /giveskill [player] <skill>
+    permission: Heroes.commands.giveskill
 permissions:
   Heroes.commands.skillmenu:
     description: Player may use the /skillmenu command
     type: boolean
     default: true
+  Heroes.commands.giveskill:
+    description: Player may use the /giveskill command
+    type: boolean
+    default: op

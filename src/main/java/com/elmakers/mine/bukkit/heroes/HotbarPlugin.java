@@ -70,6 +70,8 @@ public class HotbarPlugin extends JavaPlugin {
         // Set up command executors
         CommandExecutor skillsMenuCommand = new SkillsMenuCommandExecutor(controller);
         getCommand("skillmenu").setExecutor(skillsMenuCommand);
+        CommandExecutor giveSkillCommand = new GiveSkillCommandExecutor(controller);
+        getCommand("giveskill").setExecutor(giveSkillCommand);
 
         // Set up listeners
         InventoryListener inventoryListener = new InventoryListener(controller);

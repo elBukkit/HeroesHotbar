@@ -1,4 +1,8 @@
 
+# 1.5
+
+ - Add giveskill command
+
 # 1.4
 
  - Add instructional lore on prepared skills for unpreparing
