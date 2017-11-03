@@ -1,4 +1,8 @@
 
+# 1.6
+
+ - Fix NPE when updating hotbars for players that have invalid skill items
+
 # 1.5
 
  - Add giveskill command
