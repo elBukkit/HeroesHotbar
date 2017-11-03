@@ -44,6 +44,7 @@ public class HotbarUpdateTask implements Runnable {
         Hero hero = controller.getHero(player);
         if (hero == null) return 0;
         Skill skill = controller.getSkill(skillKey);
+        if (skill == null) return 0;
         return SkillConfigManager.getUseSetting(hero, skill, SkillSetting.MANA, 0, true);
     }
 
