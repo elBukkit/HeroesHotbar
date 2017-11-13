@@ -1,4 +1,8 @@
 
+# 1.7
+
+ - Fix unprepare lore duplicating when spamming left-click+right-click on an item
+
 # 1.6
 
  - Fix NPE when updating hotbars for players that have invalid skill items
