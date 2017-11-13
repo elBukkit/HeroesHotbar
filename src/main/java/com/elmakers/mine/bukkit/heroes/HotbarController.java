@@ -418,9 +418,12 @@ public class HotbarController {
             OptionalInt preparedPoints = hero.getSkillPrepareCost(skill);
             if (preparedPoints.isPresent() && hero.isSkillPrepared(skillKey)) {
                 // Unprepare it, update item name
-                // lore is not updated here, it could be but doesn't seem that important.
                 hero.unprepareSkill(skill);
                 CompatibilityUtils.setDisplayName(item, getSkillTitle(player, skillKey));
+
+                List<String> lore = new ArrayList<>();
+                addSkillLore(new SkillDescription(this, player, skillKey), lore, player);
+                CompatibilityUtils.setLore(item, lore);
 
                 // Message the player
                 int usedPoints = hero.getUsedSkillPreparePoints();
@@ -475,11 +478,9 @@ public class HotbarController {
                             .replace("$points", Integer.toString(remainingPoints))
                             .replace("$slots", Integer.toString(remainingSlots)));
 
-                        ItemMeta itemMeta = item.getItemMeta();
-                        List<String> lore = itemMeta.getLore();
-                        lore.add(getMessage("skills.unprepare_lore"));
-                        itemMeta.setLore(lore);
-                        item.setItemMeta(itemMeta);
+                        List<String> lore = new ArrayList<>();
+                        addSkillLore(new SkillDescription(this, player, skillKey), lore, player);
+                        CompatibilityUtils.setLore(item, lore);
                     }
                 }
             }
