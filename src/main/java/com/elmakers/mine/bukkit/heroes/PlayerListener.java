@@ -5,9 +5,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
@@ -60,6 +62,22 @@ public class PlayerListener implements Listener {
         boolean isSkill = controller.isSkill(next);
         if (isSkill) {
             controller.useSkill(player, next);
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onPlayerInteract(PlayerInteractEvent event)
+    {
+        if (event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
+
+        Player player = event.getPlayer();
+        PlayerInventory inventory = player.getInventory();
+        ItemStack itemInHand = inventory.getItemInMainHand();
+
+        boolean isSkill = controller.isSkill(itemInHand);
+        if (isSkill) {
+            controller.useSkill(player, itemInHand);
             event.setCancelled(true);
         }
     }

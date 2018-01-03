@@ -2,6 +2,7 @@
 # 1.7
 
  - Fix unprepare lore duplicating when spamming left-click+right-click on an item
+ - Right-clicking while holding a skill item will use it
 
 # 1.6
 
