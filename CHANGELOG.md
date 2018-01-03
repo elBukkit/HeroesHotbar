@@ -1,4 +1,7 @@
 
+# 1.8
+
+
 # 1.7
 
  - Fix unprepare lore duplicating when spamming left-click+right-click on an item
