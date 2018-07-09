@@ -332,7 +332,7 @@ public class HotbarController {
 
         HeroClass heroClass = hero.getHeroClass();
         HeroClass secondClass = hero.getSecondaryClass();
-        HeroClass raceClass = hero.getSecondaryClass();
+        HeroClass raceClass = hero.getRaceClass();
         Set<String> primarySkills = new HashSet<>();
         Set<String> secondarySkills = new HashSet<>();
         Set<String> raceSkills = new HashSet<>();
