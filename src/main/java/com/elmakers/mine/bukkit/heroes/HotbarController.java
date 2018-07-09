@@ -331,7 +331,7 @@ public class HotbarController {
         if (hero == null) return emptySkillList;
 
         HeroClass heroClass = hero.getHeroClass();
-        HeroClass secondClass = hero.getSecondaryClass();();
+        HeroClass secondClass = hero.getSecondaryClass();
         HeroClass raceClass = hero.getSecondaryClass();
         Set<String> primarySkills = new HashSet<>();
         Set<String> secondarySkills = new HashSet<>();
