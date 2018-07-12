@@ -332,19 +332,27 @@ public class HotbarController {
 
         HeroClass heroClass = hero.getHeroClass();
         HeroClass secondClass = hero.getSecondaryClass();
+        HeroClass raceClass = hero.getRaceClass();
         Set<String> primarySkills = new HashSet<>();
         Set<String> secondarySkills = new HashSet<>();
+        Set<String> raceSkills = new HashSet<>();
         addSkills(hero, heroClass, primarySkills, showUnuseable, showPassive);
         addSkills(hero, secondClass, secondarySkills, showUnuseable, showPassive);
+        addSkills(hero, raceClass, raceSkills, showUnuseable, showPassive);
         secondarySkills.removeAll(primarySkills);
+        raceSkills.removeAll(primarySkills);
 
         Multimap<Integer, Skill> primaryMap = mapSkillsByLevel(hero, primarySkills);
         Multimap<Integer, Skill> secondaryMap = mapSkillsByLevel(hero, secondarySkills);
+        Multimap<Integer, Skill> raceMap = mapSkillsByLevel(hero, raceSkills);
         List<String> skillNames = new ArrayList<>();
         for (Skill skill : primaryMap.values()) {
             skillNames.add(skill.getName());
         }
         for (Skill skill : secondaryMap.values()) {
+            skillNames.add(skill.getName());
+        }
+        for (Skill skill : raceMap.values()) {
             skillNames.add(skill.getName());
         }
         return skillNames;
