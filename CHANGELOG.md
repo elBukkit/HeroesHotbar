@@ -1,6 +1,7 @@
 
 # 1.8
 
+ - Race compatibility
 
 # 1.7
 
