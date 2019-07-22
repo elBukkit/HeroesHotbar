@@ -25,9 +25,10 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -58,6 +59,7 @@ public class HotbarController {
     private int skillInventoryRows;
     private MaterialAndData defaultSkillIcon;
     private String defaultDisabledIconURL;
+    private MaterialAndData skullMaterial;
 
     private Map<UUID, SkillSelector> selectors = new HashMap<>();
 
@@ -140,7 +142,17 @@ public class HotbarController {
         }
 
         if (iconURL != null && !iconURL.isEmpty()) {
-            item = InventoryUtils.getURLSkull(iconURL);
+            try {
+                MaterialAndData skullMaterial = getSkullMaterial();
+                if (skullMaterial == null) {
+                    getLogger().warning("Unable to find a skull material to use for icons");
+                } else {
+                    item = new ItemStack(skullMaterial.getMaterial(), 1, skullMaterial.getData());
+                    InventoryUtils.setSkullURLAndName(item, new URL(iconURL), "MHF_Question", UUID.randomUUID());
+                }
+            } catch (MalformedURLException e) {
+                getLogger().warning("Invalid URL: " + iconURL);
+            }
         } else {
             item = icon.createItemStack();
         }
@@ -172,6 +184,23 @@ public class HotbarController {
         CompatibilityUtils.setLore(item, lore);
 
         return item;
+    }
+
+    protected MaterialAndData getSkullMaterial() {
+        if (skullMaterial == null) {
+            try {
+                skullMaterial = new MaterialAndData(Material.SKULL_ITEM, (short)3);
+                getLogger().info("Using legacy skull item");
+            } catch (Exception not14) {
+                try {
+                    skullMaterial = new MaterialAndData(Material.valueOf("PLAYER_HEAD"), (short)0);
+                    getLogger().info("Using modern skull item");
+                } catch (Exception ex) {
+
+                }
+            }
+        }
+        return skullMaterial;
     }
 
     protected Skill getSkill(String key) {
