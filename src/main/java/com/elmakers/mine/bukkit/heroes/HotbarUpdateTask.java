@@ -110,7 +110,7 @@ public class HotbarUpdateTask implements Runnable {
                 String currentURL = InventoryUtils.getSkullURL(skillItem);
                 if (!canUse) {
                     if (!disabledUrlIcon.equals(currentURL)) {
-                        InventoryUtils.setNewSkullURL(skillItem, disabledUrlIcon);
+                        InventoryUtils.setSkullURL(skillItem, disabledUrlIcon);
                         player.getInventory().setItem(i, skillItem);
                     }
                     if (targetAmount == 99) {
@@ -121,7 +121,7 @@ public class HotbarUpdateTask implements Runnable {
                     }
                 } else {
                     if (!urlIcon.equals(currentURL)) {
-                        InventoryUtils.setNewSkullURL(skillItem, urlIcon);
+                        InventoryUtils.setSkullURL(skillItem, urlIcon);
                         player.getInventory().setItem(i, skillItem);
                     }
                 }

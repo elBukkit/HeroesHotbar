@@ -1,7 +1,7 @@
 
 # 2.0
 
- - 1.14 and 1.13 compatibility
+ - 1.16, 1.15, 1.14 1.13 compatibility
 
 # 1.8
 
