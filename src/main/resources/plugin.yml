@@ -5,6 +5,7 @@ website: http://mine.elmakers.com
 author: NathanWolf
 description : A hotbar GUI for Heroes skills
 depend: [Heroes]
+api-version: 1.16
 commands:
   skillmenu:
     description: Get Heroes skills
