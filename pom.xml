@@ -15,7 +15,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<version.java>1.8</version.java>
-		<bukkit.version>1.9.2-R0.1-SNAPSHOT</bukkit.version>
+		<bukkit.version>1.16.5-R0.1-SNAPSHOT</bukkit.version>
 	</properties>
 
 	<licenses>
@@ -81,14 +81,6 @@
             <scope>system</scope>
             <systemPath>${project.basedir}/lib/Heroes.jar</systemPath>
         </dependency>
-
-		<!-- Compatibility Lib (shaded) -->
-		<dependency>
-			<groupId>com.elmakers.mine.bukkit</groupId>
-			<artifactId>CompatibilityLib</artifactId>
-			<version>1.9-1.16-4-SNAPSHOT</version>
-			<scope>compile</scope>
-		</dependency>
 	</dependencies>
 
 	<build>
