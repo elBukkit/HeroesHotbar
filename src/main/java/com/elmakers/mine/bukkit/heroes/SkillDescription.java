@@ -12,22 +12,18 @@ public class SkillDescription implements Comparable<SkillDescription> {
     private final int skillLevel;
     private final MaterialAndData icon;
     private final MaterialAndData disabledIcon;
-    private final String iconURL;
-    private final String disabledIconURL;
 
     public SkillDescription(HotbarController controller, Player player, String skillKey) {
         this.skill = controller.getSkill(skillKey);
         this.skillKey = skillKey;
         this.skillLevel = controller.getSkillLevel(player, skillKey);
 
-        String iconURL = skill == null ? null : SkillConfigManager.getRaw(skill, "icon-url", SkillConfigManager.getRaw(skill, "icon_url", null));
         String icon = skill == null ? null : SkillConfigManager.getRaw(skill, "icon", null);
         if (icon != null && icon.startsWith("http://")) {
             icon = null;
-            iconURL = icon;
+            controller.getLogger().warning("Skull icons are no longer supported");
         }
         this.icon = icon == null || icon.isEmpty() ? null : new MaterialAndData(icon);
-        this.iconURL = iconURL;
 
         String iconDisabledURL = skill == null ? null : SkillConfigManager.getRaw(skill, "icon-disabled-url", SkillConfigManager.getRaw(skill, "icon_disabled_url", null));
         String iconDisabled = skill == null ? null : SkillConfigManager.getRaw(skill, "icon-disabled", SkillConfigManager.getRaw(skill, "icon_disabled", null));
@@ -41,8 +37,6 @@ public class SkillDescription implements Comparable<SkillDescription> {
         if (iconDisabledURL == null) {
             iconDisabledURL = controller.getDefaultDisabledIconURL();
         }
-
-        this.disabledIconURL = iconDisabledURL;
 
         String skillDisplayName = skill == null ? null : SkillConfigManager.getRaw(skill, "name", skill.getName());
         this.name = skillDisplayName == null || skillDisplayName.isEmpty() ? skillKey : skillDisplayName;
@@ -65,20 +59,16 @@ public class SkillDescription implements Comparable<SkillDescription> {
         return icon;
     }
 
-    public String getIconURL() {
-        return iconURL;
-    }
-
     public MaterialAndData getDisabledIcon() {
         return disabledIcon;
     }
 
-    public String getDisabledIconURL() {
-        return disabledIconURL;
-    }
-
     public String getName() {
         return name;
+    }
+
+    public String getKey() {
+        return skillKey;
     }
 
     public Skill getSkill() {

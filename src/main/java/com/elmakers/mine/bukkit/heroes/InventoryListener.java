@@ -1,6 +1,6 @@
 package com.elmakers.mine.bukkit.heroes;
 
-import com.elmakers.mine.bukkit.utility.InventoryUtils;
+import com.elmakers.mine.bukkit.heroes.utilities.CompatibilityUtils;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -24,12 +24,12 @@ public class InventoryListener implements Listener {
         ItemStack clickedItem = event.getCurrentItem();
         HumanEntity player = event.getWhoClicked();
 
-        if (InventoryUtils.getMetaBoolean(clickedItem, "unavailable", false)) {
+        if (CompatibilityUtils.getMetaBoolean(clickedItem, "unavailable", false)) {
             event.setCancelled(true);
             player.sendMessage(controller.getMessage("skills.unlearned").replace("$skill", controller.getSkillKey(clickedItem)));
             return;
         }
-        if (InventoryUtils.getMetaBoolean(clickedItem, "passive", false)) {
+        if (CompatibilityUtils.getMetaBoolean(clickedItem, "passive", false)) {
             event.setCancelled(true);
             return;
         }

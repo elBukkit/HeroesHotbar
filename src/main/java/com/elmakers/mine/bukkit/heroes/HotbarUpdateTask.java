@@ -1,16 +1,16 @@
 package com.elmakers.mine.bukkit.heroes;
 
-import com.elmakers.mine.bukkit.utility.InventoryUtils;
+import java.util.logging.Level;
+
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+
 import com.herocraftonline.heroes.characters.Hero;
 import com.herocraftonline.heroes.characters.skill.Skill;
 import com.herocraftonline.heroes.characters.skill.SkillConfigManager;
 import com.herocraftonline.heroes.characters.skill.SkillSetting;
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 
-import java.util.logging.Level;
-
+@SuppressWarnings("deprecation")
 public class HotbarUpdateTask implements Runnable {
     private final HotbarController controller;
 
@@ -87,10 +87,7 @@ public class HotbarUpdateTask implements Runnable {
 
             MaterialAndData disabledIcon = skillDescription.getDisabledIcon();
             MaterialAndData spellIcon = skillDescription.getIcon();
-            String urlIcon = skillDescription.getIconURL();
-            String disabledUrlIcon = skillDescription.getDisabledIconURL();
-            boolean usingURLIcon = urlIcon != null && !urlIcon.isEmpty();
-            if (disabledIcon != null && spellIcon != null && !usingURLIcon) {
+            if (disabledIcon != null && spellIcon != null) {
                 if (!canUse) {
                     if (disabledIcon.getMaterial() != skillItem.getType() || disabledIcon.getData() != skillItem.getDurability()) {
                         disabledIcon.applyToItem(skillItem);
@@ -104,25 +101,6 @@ public class HotbarUpdateTask implements Runnable {
                 } else {
                     if (spellIcon.getMaterial() != skillItem.getType() || spellIcon.getData() != skillItem.getDurability()) {
                         spellIcon.applyToItem(skillItem);
-                    }
-                }
-            } else if (usingURLIcon && disabledUrlIcon != null && !disabledUrlIcon.isEmpty() && skillItem.getType() == Material.SKULL_ITEM) {
-                String currentURL = InventoryUtils.getSkullURL(skillItem);
-                if (!canUse) {
-                    if (!disabledUrlIcon.equals(currentURL)) {
-                        InventoryUtils.setSkullURL(skillItem, disabledUrlIcon);
-                        player.getInventory().setItem(i, skillItem);
-                    }
-                    if (targetAmount == 99) {
-                        if (skillItem.getAmount() != 1) {
-                            skillItem.setAmount(1);
-                        }
-                        setAmount = true;
-                    }
-                } else {
-                    if (!urlIcon.equals(currentURL)) {
-                        InventoryUtils.setSkullURL(skillItem, urlIcon);
-                        player.getInventory().setItem(i, skillItem);
                     }
                 }
             }

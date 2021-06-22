@@ -1,12 +1,13 @@
 package com.elmakers.mine.bukkit.heroes;
 
-import com.elmakers.mine.bukkit.utility.NMSUtils;
-import com.herocraftonline.heroes.Heroes;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import com.elmakers.mine.bukkit.heroes.utilities.CompatibilityUtils;
+import com.herocraftonline.heroes.Heroes;
 
 /**
  * This is the main Plugin class for the Heroes Hotbar plugin.
@@ -35,16 +36,7 @@ public class HotbarPlugin extends JavaPlugin {
             getLogger().warning(ex.getMessage());
             return;
         }
-
-        if (NMSUtils.getFailed()) {
-            Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[HeroesHotbar] Something went wrong with some Deep Magic, plugin will not load.");
-            Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_RED + "[HeroesHotbar] Please make sure you are running a compatible version of " + ChatColor.RED + "Spigot (1.9 or Higher)!");
-        } else {
-            if (NMSUtils.isLegacy()) {
-                Bukkit.getConsoleSender().sendMessage(ChatColor.YELLOW + "[HeroesHotbar] Using backwards-compatibility layer. It is highly recommended that you update to the latest Spigot version and/or the latest plugin version.");
-            }
-            initialize();
-        }
+        initialize();
     }
 
     @Override
@@ -58,6 +50,7 @@ public class HotbarPlugin extends JavaPlugin {
      * Initialization, set up commands, listeners and controller
      */
     protected void initialize() {
+        CompatibilityUtils.initialize(this);
         saveDefaultConfig();
 
         // Set up controller

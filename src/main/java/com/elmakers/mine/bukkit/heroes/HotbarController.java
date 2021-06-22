@@ -1,32 +1,5 @@
 package com.elmakers.mine.bukkit.heroes;
 
-import com.elmakers.mine.bukkit.utility.CompatibilityUtils;
-import com.elmakers.mine.bukkit.utility.InventoryUtils;
-import com.elmakers.mine.bukkit.utility.NMSUtils;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Ordering;
-import com.google.common.collect.TreeMultimap;
-import com.herocraftonline.heroes.Heroes;
-import com.herocraftonline.heroes.characters.CharacterManager;
-import com.herocraftonline.heroes.characters.Hero;
-import com.herocraftonline.heroes.characters.classes.HeroClass;
-import com.herocraftonline.heroes.characters.skill.ActiveSkill;
-import com.herocraftonline.heroes.characters.skill.OutsourcedSkill;
-import com.herocraftonline.heroes.characters.skill.PassiveSkill;
-import com.herocraftonline.heroes.characters.skill.Skill;
-import com.herocraftonline.heroes.characters.skill.SkillConfigManager;
-import com.herocraftonline.heroes.characters.skill.SkillManager;
-import com.herocraftonline.heroes.characters.skill.SkillSetting;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.Server;
-import org.bukkit.configuration.Configuration;
-import org.bukkit.entity.HumanEntity;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.Plugin;
-
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DecimalFormat;
@@ -41,6 +14,32 @@ import java.util.OptionalInt;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
+
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.Server;
+import org.bukkit.configuration.Configuration;
+import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
+
+import com.elmakers.mine.bukkit.heroes.utilities.CompatibilityUtils;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Ordering;
+import com.google.common.collect.TreeMultimap;
+import com.herocraftonline.heroes.Heroes;
+import com.herocraftonline.heroes.characters.CharacterManager;
+import com.herocraftonline.heroes.characters.Hero;
+import com.herocraftonline.heroes.characters.classes.HeroClass;
+import com.herocraftonline.heroes.characters.skill.ActiveSkill;
+import com.herocraftonline.heroes.characters.skill.OutsourcedSkill;
+import com.herocraftonline.heroes.characters.skill.PassiveSkill;
+import com.herocraftonline.heroes.characters.skill.Skill;
+import com.herocraftonline.heroes.characters.skill.SkillConfigManager;
+import com.herocraftonline.heroes.characters.skill.SkillManager;
+import com.herocraftonline.heroes.characters.skill.SkillSetting;
 
 /**
  * This class manages the centralized hotbar functionality.
@@ -59,7 +58,6 @@ public class HotbarController {
     private int skillInventoryRows;
     private MaterialAndData defaultSkillIcon;
     private String defaultDisabledIconURL;
-    private MaterialAndData skullMaterial;
 
     private Map<UUID, SkillSelector> selectors = new HashMap<>();
 
@@ -124,55 +122,34 @@ public class HotbarController {
     public ItemStack createSkillItem(SkillDescription skill, Player player) {
         ItemStack item = null;
         MaterialAndData icon = skill.getIcon();
-        String iconURL = skill.getIconURL();
         if (icon == null) {
             icon = defaultSkillIcon;
         }
 
-        boolean unavailable = !canUseSkill(player, skill.getName());
+        boolean unavailable = !canUseSkill(player, skill.getKey());
         if (unavailable) {
             MaterialAndData disabledIcon = skill.getDisabledIcon();
             if (disabledIcon != null) {
                 icon = disabledIcon;
             }
-            String disabledIconURL = skill.getDisabledIconURL();
-            if (disabledIconURL != null && !disabledIconURL.isEmpty()) {
-                iconURL = disabledIconURL;
-            }
         }
-
-        if (iconURL != null && !iconURL.isEmpty()) {
-            try {
-                MaterialAndData skullMaterial = getSkullMaterial();
-                if (skullMaterial == null) {
-                    getLogger().warning("Unable to find a skull material to use for icons");
-                } else {
-                    item = new ItemStack(skullMaterial.getMaterial(), 1, skullMaterial.getData());
-                    InventoryUtils.setSkullURLAndName(item, new URL(iconURL), "MHF_Question", UUID.randomUUID());
-                }
-            } catch (MalformedURLException e) {
-                getLogger().warning("Invalid URL: " + iconURL);
-            }
-        } else {
-            item = icon.createItemStack();
-        }
-        item = NMSUtils.makeReal(item);
+        item = icon.createItemStack();
         if (item == null) {
             plugin.getLogger().warning("Unable to create item stack for skill: " + skill.getName());
             return null;
         }
 
         // Set flags and NBT data
-        NMSUtils.setMeta(item, skillNBTKey, skill.getName());
-        NMSUtils.makeUnbreakable(item);
-        InventoryUtils.hideFlags(item, (byte) 63);
+        CompatibilityUtils.setMeta(item, skillNBTKey, skill.getKey());
+        CompatibilityUtils.makeUnbreakable(item);
+        CompatibilityUtils.hideFlags(item);
 
         boolean passive = skill.getSkill() instanceof PassiveSkill || skill.getSkill() instanceof OutsourcedSkill;
         if (unavailable) {
-            InventoryUtils.setMetaBoolean(item, "unavailable", true);
+            CompatibilityUtils.setMetaBoolean(item, "unavailable", true);
         }
         if (passive) {
-            InventoryUtils.setMetaBoolean(item, "passive", true);
+            CompatibilityUtils.setMetaBoolean(item, "passive", true);
         }
 
         // Set display name
@@ -184,23 +161,6 @@ public class HotbarController {
         CompatibilityUtils.setLore(item, lore);
 
         return item;
-    }
-
-    protected MaterialAndData getSkullMaterial() {
-        if (skullMaterial == null) {
-            try {
-                skullMaterial = new MaterialAndData(Material.SKULL_ITEM, (short)3);
-                getLogger().info("Using legacy skull item");
-            } catch (Exception not14) {
-                try {
-                    skullMaterial = new MaterialAndData(Material.valueOf("PLAYER_HEAD"), (short)0);
-                    getLogger().info("Using modern skull item");
-                } catch (Exception ex) {
-
-                }
-            }
-        }
-        return skullMaterial;
     }
 
     protected Skill getSkill(String key) {
@@ -262,7 +222,7 @@ public class HotbarController {
         String description = skill.getDescription(hero);
         if (description != null && description.length() > 0) {
             description = getMessage("skills.description", "$description").replace("$description", description);
-            InventoryUtils.wrapText(description, MAX_LORE_LENGTH, lore);
+            CompatibilityUtils.wrapText(description, MAX_LORE_LENGTH, lore);
         }
 
         /*
@@ -416,11 +376,11 @@ public class HotbarController {
     }
 
     public boolean isSkill(ItemStack item) {
-        return InventoryUtils.hasMeta(item, skillNBTKey);
+        return CompatibilityUtils.hasMeta(item, skillNBTKey);
     }
 
     public boolean isLegacySkill(ItemStack item) {
-        return InventoryUtils.hasMeta(item, legacyNBTKey);
+        return CompatibilityUtils.hasMeta(item, legacyNBTKey);
     }
 
     public void useSkill(Player player, ItemStack item) {
@@ -526,7 +486,7 @@ public class HotbarController {
     }
 
     public String getSkillKey(ItemStack item) {
-        return InventoryUtils.getMetaString(item, skillNBTKey);
+        return CompatibilityUtils.getMetaString(item, skillNBTKey);
     }
 
     public Logger getLogger() {

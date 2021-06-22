@@ -1,7 +1,10 @@
 
 # 2.0
 
- - 1.16, 1.15, 1.14 1.13 compatibility
+ - 1.16 compatibility (only works with 1.16+ now)
+ - CustomModelData icon support
+ - Drop custom skull support
+ - Uses API only for forward-compatibility
 
 # 1.8
 
