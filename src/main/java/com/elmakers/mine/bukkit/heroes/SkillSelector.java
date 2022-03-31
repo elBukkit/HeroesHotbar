@@ -21,10 +21,12 @@ public class SkillSelector {
     private int page;
     private Map<String, SkillDescription> allSkills;
     private String inventoryTitle;
+    private boolean guiOpen;
 
     public SkillSelector(HotbarController controller, Player player) {
         this.controller = controller;
         this.player = player;
+        guiOpen = false;
 
         updateSkills();
     }
@@ -93,6 +95,15 @@ public class SkillSelector {
 
         player.closeInventory();
         player.openInventory(displayInventory);
+        guiOpen = true;
+    }
+
+    public void setGuiState(boolean open) {
+        this.guiOpen = open;
+    }
+
+    public boolean isGuiOpen() {
+        return guiOpen;
     }
 
     @Nullable

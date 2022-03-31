@@ -9,6 +9,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
@@ -38,7 +39,7 @@ public class PlayerListener implements Listener {
 
         // Catch lag-related glitches dropping items from GUIs
         SkillSelector selector = controller.getActiveSkillSelector(player);
-        if (selector != null) {
+        if (selector.isGuiOpen()) {
             event.setCancelled(true);
         }
     }
@@ -93,5 +94,10 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onLevelUp(HeroChangeLevelEvent event) {
         controller.getActiveSkillSelector(event.getHero().getPlayer()).updateSkills();
+    }
+
+    @EventHandler
+    public void onInventoryClose(InventoryCloseEvent e) {
+        controller.getActiveSkillSelector(e.getPlayer()).setGuiState(false);
     }
 }

@@ -26,11 +26,11 @@ public class GiveSkillCommandExecutor implements CommandExecutor {
             return true;
         }
         if (!(sender instanceof Player) && args.length <= 1) {
-            sender.sendMessage(ChatColor.RED + "Console Usage: giveskill <player> <skill>");
+            sender.sendMessage(ChatColor.RED + "Console Usage: /giveskill <player> <skill>");
             return true;
         }
         if (args.length <= 0) {
-            sender.sendMessage(ChatColor.RED + "Usage: giveskill [player] <skill>");
+            sender.sendMessage(ChatColor.RED + "Usage: /giveskill <player> <skill> or /giveskill <skill>");
             return true;
         }
 
@@ -46,7 +46,7 @@ public class GiveSkillCommandExecutor implements CommandExecutor {
         String skillName = args.length > 1 ? args[1] : args[0];
 
         SkillDescription skillDescription = controller.getSkillDescription(player, skillName);
-        if (!skillDescription.isValid()) {
+        if (skillDescription == null || !skillDescription.isValid()) {
             sender.sendMessage(ChatColor.RED + "Unknown skill: " + skillName);
             return true;
         }

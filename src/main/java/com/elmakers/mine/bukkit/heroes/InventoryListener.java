@@ -8,7 +8,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
 
@@ -42,21 +41,17 @@ public class InventoryListener implements Listener {
         // Check for right-click-to-prepare
         boolean isRightClick = action == InventoryAction.PICKUP_HALF;
         if (isSkill && isRightClick) {
-            if (player instanceof Player) {
-                controller.unprepareSkill((Player) player, clickedItem);
-            }
+            controller.unprepareSkill((Player) player, clickedItem);
             event.setCancelled(true);
             return;
         }
 
         // Drop key unprepares
         if (isSkill && isDrop) {
-            if (player instanceof Player) {
-                controller.unprepareSkill((Player) player, clickedItem);
-            }
+            controller.unprepareSkill((Player) player, clickedItem);
 
             // Only cancel event if in the skill selector
-            if (skillSelector != null) {
+            if (skillSelector.isGuiOpen()) {
                 event.setCancelled(true);
             }
             return;
@@ -93,7 +88,7 @@ public class InventoryListener implements Listener {
                 }
 
                 // Just prepare but don't grab, if the skill inventory is open and we already have this skill
-                if (!event.isCancelled() && skillSelector != null && controller.hasSkillItem((Player)player, controller.getSkillKey(clickedItem))) {
+                if (!event.isCancelled() && skillSelector.isGuiOpen() && controller.hasSkillItem((Player)player, controller.getSkillKey(clickedItem))) {
                     event.setCancelled(true);
                 }
             }
@@ -102,7 +97,7 @@ public class InventoryListener implements Listener {
         }
 
         // Delegate to skill selector
-        if (skillSelector != null) {
+        if (skillSelector.isGuiOpen()) {
             skillSelector.onClick(event);
             return;
         }

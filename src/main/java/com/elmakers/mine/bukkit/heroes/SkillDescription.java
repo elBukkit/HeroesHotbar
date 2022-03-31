@@ -7,6 +7,7 @@ import com.herocraftonline.heroes.characters.skill.Skill;
 import com.herocraftonline.heroes.characters.skill.SkillConfigManager;
 import com.herocraftonline.heroes.characters.skill.SkillSetting;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.profile.PlayerProfile;
@@ -52,7 +53,8 @@ public class SkillDescription implements Comparable<SkillDescription> {
             this.disabledProfile = CompatibilityUtils.getPlayerProfile(skillKey, iconDisabledURL);
         }
 
-        this.icon = controller.getSkillItem(this, player);
+        this.icon = new ItemStack(Material.PLAYER_HEAD, 1);
+        controller.getSkillItem(this, player);
     }
 
     public boolean isHeroes() {
@@ -75,7 +77,7 @@ public class SkillDescription implements Comparable<SkillDescription> {
         return icon;
     }
 
-    public void setProfileState(boolean enabled) {
+    public void setProfileState(ItemStack icon, boolean enabled) {
         CompatibilityUtils.setSkullProfile(icon, enabled ? iconProfile : disabledProfile);
     }
 

@@ -14,7 +14,6 @@ import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.entity.HumanEntity;
@@ -128,14 +127,24 @@ public class HotbarController {
         return description;
     }
 
+    public boolean isGuiOpen(Player player) {
+        SkillSelector selector = this.selectors.get(player.getUniqueId());
+        if(selector == null) {
+            return false;
+        }
+        else {
+            return selector.isGuiOpen();
+        }
+    }
+
     /**
      * Get's a skill item. This updates any needed metadata it may pertain to as well
      * @param skill
      * @param player
      * @return
      */
-    public ItemStack getSkillItem(SkillDescription skill, Player player) {
-        ItemStack item = new ItemStack(Material.PLAYER_HEAD, 1);
+    public void getSkillItem(SkillDescription skill, Player player) {
+        ItemStack item = skill.getIcon();
 
         boolean passive = skill.getSkill() instanceof PassiveSkill || skill.getSkill() instanceof OutsourcedSkill;
         if (passive) {
@@ -146,8 +155,13 @@ public class HotbarController {
 
         CompatibilityUtils.makeUnbreakable(item);
         CompatibilityUtils.hideFlags(item);
+        // Set display name
+        CompatibilityUtils.setDisplayName(item, getSkillTitle(player, skill.getName()));
 
-        return item;
+        // Set lore
+        List<String> lore = new ArrayList<>();
+        addSkillLore(skill, lore, player);
+        CompatibilityUtils.setLore(item, lore);
     }
 
     public void updateSkillItem(ItemStack item, SkillDescription skill, Player player) {
@@ -156,19 +170,8 @@ public class HotbarController {
         // Set flags and NBT data
         CompatibilityUtils.setMeta(item, skillNBTKey, skill.getKey());
 
-
-        if (unavailable) {
-            CompatibilityUtils.setMetaBoolean(item, "unavailable", true);
-        }
-        skill.setProfileState(!unavailable);
-
-        // Set display name
-        CompatibilityUtils.setDisplayName(item, getSkillTitle(player, skill.getName()));
-
-        // Set lore
-        List<String> lore = new ArrayList<>();
-        addSkillLore(skill, lore, player);
-        CompatibilityUtils.setLore(item, lore);
+        CompatibilityUtils.setMetaBoolean(item, "unavailable", unavailable);
+        skill.setProfileState(item, !unavailable);
     }
 
     protected Skill getSkill(String key) {
