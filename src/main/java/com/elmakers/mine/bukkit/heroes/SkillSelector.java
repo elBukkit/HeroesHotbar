@@ -23,10 +23,14 @@ public class SkillSelector {
     private String inventoryTitle;
 
     public SkillSelector(HotbarController controller, Player player) {
-        this.allSkills= new LinkedHashMap<>();
         this.controller = controller;
         this.player = player;
 
+        updateSkills();
+    }
+
+    public void updateSkills() {
+        this.allSkills = new LinkedHashMap<>();
         String classString = controller.getClassName(player);
         String class2String = controller.getSecondaryClassName(player);
         String messageKey = !class2String.isEmpty() ? "skills.inventory_title_secondary" : "skills.inventory_title";
@@ -84,7 +88,7 @@ public class SkillSelector {
         Inventory displayInventory = CompatibilityUtils.createInventory(null, invSize, title);
 
         for (SkillDescription skill : skills) {
-            displayInventory.addItem(skill.getIcon());
+            displayInventory.addItem(skill.updateIcon(controller, player));
         }
 
         player.closeInventory();

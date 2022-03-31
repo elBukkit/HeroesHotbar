@@ -146,9 +146,7 @@ public class CompatibilityUtils {
             list.add(colorPrefix + line);
         }
     }
-    @Nullable
-    public static ItemStack getSkullIcon(UUID uuid) {
-        ItemStack skull = new ItemStack(Material.PLAYER_HEAD, 1);
+    public static void updateSkullIcon(ItemStack skull, UUID uuid) {
         SkullMeta meta = (SkullMeta)skull.getItemMeta();
         meta.setOwningPlayer(plugin.getServer().getOfflinePlayer(uuid));
         PlayerProfile profile = meta.getOwnerProfile();
@@ -157,31 +155,26 @@ public class CompatibilityUtils {
         }
         else {
             plugin.getLogger().warning(() -> "Failed to get profile for UUID " + uuid);
-            return null;
+            return;
         }
         meta.setOwnerProfile(profile);
         skull.setItemMeta(meta);
-        return skull;
     }
 
-    @Nullable
-    public static ItemStack getSkullIcon(String name, String url) {
-        ItemStack skull = new ItemStack(Material.PLAYER_HEAD, 1);
+    public static void updateSkullIcon(ItemStack skull, String name, String url) {
         SkullMeta meta = (SkullMeta)skull.getItemMeta();
 
-        PlayerProfile profile = plugin.getServer().createPlayerProfile(name);
+        PlayerProfile profile = plugin.getServer().createPlayerProfile(UUID.randomUUID(), name);
         PlayerTextures texture = profile.getTextures();
         try {
             texture.setSkin(new URL(url));
         }
         catch(MalformedURLException e) {
             plugin.getLogger().log(Level.WARNING, () -> "Url was malformed for skill icon " + name);
-            return null;
+            return;
         }
         profile.setTextures(texture);
         meta.setOwnerProfile(profile);
         skull.setItemMeta(meta);
-
-        return skull;
     }
 }

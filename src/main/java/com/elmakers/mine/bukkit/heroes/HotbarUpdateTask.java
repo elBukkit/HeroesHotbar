@@ -21,7 +21,6 @@ public class HotbarUpdateTask implements Runnable {
     public void run() {
         try {
             for (Player player : controller.getServer().getOnlinePlayers()) {
-                controller.getLogger().info("Updating Hotbar");
                 updateHotbar(player);
             }
         } catch (Exception ex) {
@@ -86,6 +85,7 @@ public class HotbarUpdateTask implements Runnable {
             SkillDescription skillDescription = controller.getSkillDescription(player, skillKey);
 
             if (!canUse) {
+                skillDescription.updateIcon(controller, player);
                 if (targetAmount == 99) {
                     if (skillItem.getAmount() != 1) {
                         skillItem.setAmount(1);
@@ -93,7 +93,6 @@ public class HotbarUpdateTask implements Runnable {
                     setAmount = true;
                 }
             }
-            skillDescription.updateIcon(controller, player);
 
             if (!setAmount && skillItem.getAmount() != targetAmount) {
                 skillItem.setAmount(targetAmount);

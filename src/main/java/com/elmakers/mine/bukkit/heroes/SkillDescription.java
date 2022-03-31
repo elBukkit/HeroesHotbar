@@ -21,7 +21,7 @@ public class SkillDescription implements Comparable<SkillDescription> {
     private final int skillLevel;
     private final String iconURL;
     private final String disabledIconURL;
-    private ItemStack icon;
+    private final ItemStack icon;
 
     public SkillDescription(HotbarController controller, Player player, String skillKey) {
         this.skill = controller.getSkill(skillKey);
@@ -68,7 +68,7 @@ public class SkillDescription implements Comparable<SkillDescription> {
 
     public ItemStack updateIcon(HotbarController controller, Player player) {
         //fixme: Technically speaking, the code to generate the skull item SHOULD be here not in controller. But anyway
-        icon = controller.getSkillItem(this, player);
+        controller.updateSkillItem(icon, this, player);
         return icon;
     }
 

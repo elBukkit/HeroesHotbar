@@ -1,5 +1,6 @@
 package com.elmakers.mine.bukkit.heroes;
 
+import com.herocraftonline.heroes.api.events.HeroChangeLevelEvent;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -87,5 +88,10 @@ public class PlayerListener implements Listener {
         if (controller.isSkill(itemStack) || controller.isLegacySkill(itemStack)) {
             event.setCancelled(true);
         }
+    }
+
+    @EventHandler
+    public void onLevelUp(HeroChangeLevelEvent event) {
+        controller.getActiveSkillSelector(event.getHero().getPlayer()).updateSkills();
     }
 }

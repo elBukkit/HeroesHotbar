@@ -1,7 +1,5 @@
 package com.elmakers.mine.bukkit.heroes;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,14 +16,11 @@ import java.util.logging.Logger;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Server;
-import org.bukkit.block.Block;
-import org.bukkit.block.Skull;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.plugin.Plugin;
 
 import com.elmakers.mine.bukkit.heroes.utilities.CompatibilityUtils;
@@ -138,40 +133,48 @@ public class HotbarController {
      * @return
      */
     public ItemStack getSkillItem(SkillDescription skill, Player player) {
+        ItemStack item = new ItemStack(Material.PLAYER_HEAD, 1);
+
+        boolean passive = skill.getSkill() instanceof PassiveSkill || skill.getSkill() instanceof OutsourcedSkill;
+        if (passive) {
+            CompatibilityUtils.setMetaBoolean(item, "passive", true);
+        }
+
+        updateSkillItem(item, skill, player);
 
         boolean unavailable = !canUseSkill(player, skill.getKey());
 
-        String iconURL = unavailable ? skill.getDisabledIconURL() : skill.getIconURL();
-
-        ItemStack item = iconURL == null || iconURL.isEmpty()
-                ? CompatibilityUtils.getSkullIcon(UUID.fromString("606e2ff0-ed77-4842-9d6c-e1d3321c7838"))
-                : CompatibilityUtils.getSkullIcon(skill.getKey(), iconURL);
-
-        if (item == null) {
-            plugin.getLogger().warning("Unable to create item stack for skill: " + skill.getName());
-            return null;
-        }
-
-        // Set flags and NBT data
-        CompatibilityUtils.setMeta(item, skillNBTKey, skill.getKey());
         CompatibilityUtils.makeUnbreakable(item);
         CompatibilityUtils.hideFlags(item);
 
-        boolean passive = skill.getSkill() instanceof PassiveSkill || skill.getSkill() instanceof OutsourcedSkill;
+        String iconURL = unavailable ? skill.getDisabledIconURL() : skill.getIconURL();
+
+        if (iconURL == null || iconURL.isEmpty()) {
+            CompatibilityUtils.updateSkullIcon(item, UUID.fromString("606e2ff0-ed77-4842-9d6c-e1d3321c7838"));
+        } else {
+            CompatibilityUtils.updateSkullIcon(item, skill.getKey(), iconURL);
+        }
+        return item;
+    }
+
+    public void updateSkillItem(ItemStack item, SkillDescription skill, Player player) {
+        boolean unavailable = !canUseSkill(player, skill.getKey());
+
+        // Set flags and NBT data
+        CompatibilityUtils.setMeta(item, skillNBTKey, skill.getKey());
+
+
         if (unavailable) {
             CompatibilityUtils.setMetaBoolean(item, "unavailable", true);
-        }
-        if (passive) {
-            CompatibilityUtils.setMetaBoolean(item, "passive", true);
         }
 
         // Set display name
         CompatibilityUtils.setDisplayName(item, getSkillTitle(player, skill.getName()));
 
         // Set lore
-        updateSkillLore(skill, player);
-
-        return item;
+        List<String> lore = new ArrayList<>();
+        addSkillLore(skill, lore, player);
+        CompatibilityUtils.setLore(item, lore);
     }
 
     protected Skill getSkill(String key) {
@@ -208,8 +211,7 @@ public class HotbarController {
         }
         return null;
     }
-    public void updateSkillLore(SkillDescription skillDescription, Player player) {
-        List<String> lore = new ArrayList<>();
+    public void addSkillLore(SkillDescription skillDescription, List<String> lore, Player player) {
         Hero hero = getHero(player);
         if (hero == null) return;
         Skill skill = skillDescription.getSkill();
@@ -253,6 +255,11 @@ public class HotbarController {
         if (preparedPoints.isPresent() && isPrepared(player, skill.getName())) {
             lore.add(getMessage("skills.unprepare_lore"));
         }
+    }
+
+    public void updateSkillLore(SkillDescription skillDescription, Player player) {
+        List<String> lore = new ArrayList<>();
+        addSkillLore(skillDescription, lore, player);
         CompatibilityUtils.setLore(skillDescription.getIcon(), lore);
     }
 
