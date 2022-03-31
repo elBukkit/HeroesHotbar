@@ -12,6 +12,8 @@ public class SkillDescription implements Comparable<SkillDescription> {
     private final int skillLevel;
     private final MaterialAndData icon;
     private final MaterialAndData disabledIcon;
+    private final String iconURL;
+    private final String disabledIconURL;
 
     public SkillDescription(HotbarController controller, Player player, String skillKey) {
         this.skill = controller.getSkill(skillKey);
@@ -19,10 +21,13 @@ public class SkillDescription implements Comparable<SkillDescription> {
         this.skillLevel = controller.getSkillLevel(player, skillKey);
 
         String icon = skill == null ? null : SkillConfigManager.getRaw(skill, "icon", null);
+        String iconURL = skill == null ? null : SkillConfigManager.getRaw(skill, "icon-url", SkillConfigManager.getRaw(skill, "icon_url", null));
         if (icon != null && icon.startsWith("http://")) {
+            iconURL = icon;
             icon = null;
-            controller.getLogger().warning("Skull icons are no longer supported");
+            //controller.getLogger().warning("Skull icons are no longer supported");
         }
+        this.iconURL = iconURL;
         this.icon = icon == null || icon.isEmpty() ? null : new MaterialAndData(icon);
 
         String iconDisabledURL = skill == null ? null : SkillConfigManager.getRaw(skill, "icon-disabled-url", SkillConfigManager.getRaw(skill, "icon_disabled_url", null));
@@ -31,6 +36,7 @@ public class SkillDescription implements Comparable<SkillDescription> {
             iconDisabled = null;
             iconDisabledURL = icon;
         }
+        this.disabledIconURL = iconDisabledURL;
 
         this.disabledIcon = iconDisabled == null || iconDisabled.isEmpty() ? null : new MaterialAndData(iconDisabled);
 
