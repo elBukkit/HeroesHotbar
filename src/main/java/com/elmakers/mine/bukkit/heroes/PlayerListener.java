@@ -39,7 +39,6 @@ public class PlayerListener implements Listener {
         SkillSelector selector = controller.getActiveSkillSelector(player);
         if (selector != null) {
             event.setCancelled(true);
-            return;
         }
     }
 
@@ -49,7 +48,6 @@ public class PlayerListener implements Listener {
         ItemStack spawnedItem = itemEntity.getItemStack();
         if (controller.isSkill(spawnedItem) || controller.isLegacySkill(spawnedItem)) {
             event.setCancelled(true);
-            return;
         }
     }
 
@@ -88,7 +86,6 @@ public class PlayerListener implements Listener {
         ItemStack itemStack = event.getItemInHand();
         if (controller.isSkill(itemStack) || controller.isLegacySkill(itemStack)) {
             event.setCancelled(true);
-            return;
         }
     }
 }

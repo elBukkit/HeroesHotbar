@@ -60,10 +60,6 @@
 		</repository>
 
 		<repository>
-			<id>spigot-repo</id>
-			<url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
-		</repository>
-		<repository>
 			<id>heroes-repo</id>
 			<url>https://nexus.hc.to/content/repositories/pub_releases/</url>
 		</repository>

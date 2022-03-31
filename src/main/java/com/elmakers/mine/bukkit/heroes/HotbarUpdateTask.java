@@ -10,7 +10,6 @@ import com.herocraftonline.heroes.characters.skill.Skill;
 import com.herocraftonline.heroes.characters.skill.SkillConfigManager;
 import com.herocraftonline.heroes.characters.skill.SkillSetting;
 
-@SuppressWarnings("deprecation")
 public class HotbarUpdateTask implements Runnable {
     private final HotbarController controller;
 
@@ -22,6 +21,7 @@ public class HotbarUpdateTask implements Runnable {
     public void run() {
         try {
             for (Player player : controller.getServer().getOnlinePlayers()) {
+                controller.getLogger().info("Updating Hotbar");
                 updateHotbar(player);
             }
         } catch (Exception ex) {

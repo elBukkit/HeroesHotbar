@@ -4,6 +4,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Level;
 
 import com.elmakers.mine.bukkit.heroes.SkillDescription;
@@ -144,6 +145,23 @@ public class CompatibilityUtils {
 
             list.add(colorPrefix + line);
         }
+    }
+    @Nullable
+    public static ItemStack getSkullIcon(UUID uuid) {
+        ItemStack skull = new ItemStack(Material.PLAYER_HEAD, 1);
+        SkullMeta meta = (SkullMeta)skull.getItemMeta();
+        meta.setOwningPlayer(plugin.getServer().getOfflinePlayer(uuid));
+        PlayerProfile profile = meta.getOwnerProfile();
+        if(profile != null) {
+            profile.update();
+        }
+        else {
+            plugin.getLogger().warning(() -> "Failed to get profile for UUID " + uuid);
+            return null;
+        }
+        meta.setOwnerProfile(profile);
+        skull.setItemMeta(meta);
+        return skull;
     }
 
     @Nullable

@@ -81,10 +81,10 @@ public class HotbarController {
 
         skillInventoryRows = config.getInt("skill_inventory_max_rows", 6);
         try {
-            defaultSkillIcon = new MaterialAndData(config.getString("default_skill_icon", "stick"));
+            defaultSkillIcon = new MaterialAndData(config.getString("default_skill_icon", "player_head"));
         } catch (Exception ex) {
             plugin.getLogger().warning("Invalid icon in config: " + config.getString("default_skill_icon"));
-            defaultSkillIcon = new MaterialAndData(Material.STICK);
+            defaultSkillIcon = new MaterialAndData(Material.PLAYER_HEAD);
         }
 
         int hotbarUpdateInterval = config.getInt("update_interval");
@@ -123,19 +123,10 @@ public class HotbarController {
     }
 
     public ItemStack createSkillItem(SkillDescription skill, Player player) {
-        ItemStack item = null;
-        MaterialAndData icon = skill.getIcon();
+        ItemStack item;
         String iconURL = skill.getIconURL();
-        if (icon == null) {
-            icon = defaultSkillIcon;
-        }
-
         boolean unavailable = !canUseSkill(player, skill.getKey());
         if (unavailable) {
-            MaterialAndData disabledIcon = skill.getDisabledIcon();
-            if (disabledIcon != null) {
-                icon = disabledIcon;
-            }
             String disabledIconURL = skill.getDisabledIconURL();
             if (disabledIconURL != null && !disabledIconURL.isEmpty()) {
                 iconURL = disabledIconURL;
@@ -145,7 +136,8 @@ public class HotbarController {
         if (iconURL != null && !iconURL.isEmpty()) {
             item = CompatibilityUtils.getSkullIcon(skill.getKey(), iconURL);
         } else {
-            item = icon.createItemStack();
+            //If iconURL is null or empty use empty icon (MHF_Question's UUID)
+            item = CompatibilityUtils.getSkullIcon(UUID.fromString("606e2ff0-ed77-4842-9d6c-e1d3321c7838"));
         }
         if (item == null) {
             plugin.getLogger().warning("Unable to create item stack for skill: " + skill.getName());
