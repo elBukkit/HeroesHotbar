@@ -5,8 +5,10 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 
+import com.elmakers.mine.bukkit.heroes.HotbarController;
 import com.elmakers.mine.bukkit.heroes.SkillDescription;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
@@ -146,24 +148,18 @@ public class CompatibilityUtils {
             list.add(colorPrefix + line);
         }
     }
-    public static void updateSkullIcon(ItemStack skull, UUID uuid) {
+    public static void getUnknownIcon(HotbarController controller, UUID uuid) {
+        PlayerProfile profile = plugin.getServer().createPlayerProfile(uuid);
+        profile.update().thenAcceptAsync(controller::setUnknownIcon, runnable -> Bukkit.getScheduler().runTask(plugin, runnable));
+    }
+
+    public static void setSkullProfile(ItemStack skull, PlayerProfile profile) {
         SkullMeta meta = (SkullMeta)skull.getItemMeta();
-        meta.setOwningPlayer(plugin.getServer().getOfflinePlayer(uuid));
-        PlayerProfile profile = meta.getOwnerProfile();
-        if(profile != null) {
-            profile.update();
-        }
-        else {
-            plugin.getLogger().warning(() -> "Failed to get profile for UUID " + uuid);
-            return;
-        }
         meta.setOwnerProfile(profile);
         skull.setItemMeta(meta);
     }
 
-    public static void updateSkullIcon(ItemStack skull, String name, String url) {
-        SkullMeta meta = (SkullMeta)skull.getItemMeta();
-
+    public static PlayerProfile getPlayerProfile(String name, String url) {
         PlayerProfile profile = plugin.getServer().createPlayerProfile(UUID.randomUUID(), name);
         PlayerTextures texture = profile.getTextures();
         try {
@@ -171,10 +167,9 @@ public class CompatibilityUtils {
         }
         catch(MalformedURLException e) {
             plugin.getLogger().log(Level.WARNING, () -> "Url was malformed for skill icon " + name);
-            return;
+            return null;
         }
         profile.setTextures(texture);
-        meta.setOwnerProfile(profile);
-        skull.setItemMeta(meta);
+        return profile;
     }
 }

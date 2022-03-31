@@ -9,9 +9,11 @@ import com.herocraftonline.heroes.characters.skill.SkillSetting;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.profile.PlayerProfile;
 
 import java.util.List;
 import java.util.OptionalInt;
+import java.util.UUID;
 
 public class SkillDescription implements Comparable<SkillDescription> {
     private final String skillKey;
@@ -19,29 +21,36 @@ public class SkillDescription implements Comparable<SkillDescription> {
     private final String description;
     private final Skill skill;
     private final int skillLevel;
-    private final String iconURL;
-    private final String disabledIconURL;
     private final ItemStack icon;
+    private final PlayerProfile iconProfile;
+    private final PlayerProfile disabledProfile;
 
     public SkillDescription(HotbarController controller, Player player, String skillKey) {
         this.skill = controller.getSkill(skillKey);
         this.skillKey = skillKey;
         this.skillLevel = controller.getSkillLevel(player, skillKey);
 
-        this.iconURL = skill == null ? null : SkillConfigManager.getRaw(skill, "icon-url", SkillConfigManager.getRaw(skill, "icon_url", null));
-
-
-        String iconDisabledURL = skill == null ? null : SkillConfigManager.getRaw(skill, "icon-disabled-url", SkillConfigManager.getRaw(skill, "icon_disabled_url", null));
-
-        if (iconDisabledURL == null) {
-            iconDisabledURL = controller.getDefaultDisabledIconURL();
-        }
-
-        this.disabledIconURL = iconDisabledURL;
-
         String skillDisplayName = skill == null ? null : SkillConfigManager.getRaw(skill, "name", skill.getName());
         this.name = skillDisplayName == null || skillDisplayName.isEmpty() ? skillKey : skillDisplayName;
         this.description = skill == null ? null : SkillConfigManager.getRaw(skill, "description", "");
+
+        String iconURL = skill == null ? null : SkillConfigManager.getRaw(skill, "icon-url", SkillConfigManager.getRaw(skill, "icon_url", null));
+
+        if(iconURL == null || iconURL.isEmpty()) {
+            this.iconProfile = controller.getUnknownIcon();
+        }
+        else {
+            this.iconProfile = CompatibilityUtils.getPlayerProfile(skillKey, iconURL);
+        }
+
+        String iconDisabledURL = skill == null ? null : SkillConfigManager.getRaw(skill, "icon-disabled-url", SkillConfigManager.getRaw(skill, "icon_disabled_url", null));
+
+        if (iconDisabledURL == null || iconDisabledURL.isEmpty()) {
+            this.disabledProfile = controller.getDefaultDisabledIcon();
+        }
+        else {
+            this.disabledProfile = CompatibilityUtils.getPlayerProfile(skillKey, iconDisabledURL);
+        }
 
         this.icon = controller.getSkillItem(this, player);
     }
@@ -66,18 +75,14 @@ public class SkillDescription implements Comparable<SkillDescription> {
         return icon;
     }
 
+    public void setProfileState(boolean enabled) {
+        CompatibilityUtils.setSkullProfile(icon, enabled ? iconProfile : disabledProfile);
+    }
+
     public ItemStack updateIcon(HotbarController controller, Player player) {
         //fixme: Technically speaking, the code to generate the skull item SHOULD be here not in controller. But anyway
         controller.updateSkillItem(icon, this, player);
         return icon;
-    }
-
-    public String getIconURL() {
-        return iconURL;
-    }
-
-    public String getDisabledIconURL() {
-        return disabledIconURL;
     }
 
     public String getName() {

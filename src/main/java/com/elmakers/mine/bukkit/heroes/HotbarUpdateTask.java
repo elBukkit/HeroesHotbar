@@ -92,7 +92,9 @@ public class HotbarUpdateTask implements Runnable {
                     }
                     setAmount = true;
                 }
+
             }
+            skillDescription.setProfileState(canUse);
 
             if (!setAmount && skillItem.getAmount() != targetAmount) {
                 skillItem.setAmount(targetAmount);

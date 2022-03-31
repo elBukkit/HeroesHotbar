@@ -38,6 +38,7 @@ import com.herocraftonline.heroes.characters.skill.Skill;
 import com.herocraftonline.heroes.characters.skill.SkillConfigManager;
 import com.herocraftonline.heroes.characters.skill.SkillManager;
 import com.herocraftonline.heroes.characters.skill.SkillSetting;
+import org.bukkit.profile.PlayerProfile;
 
 /**
  * This class manages the centralized hotbar functionality.
@@ -54,8 +55,9 @@ public class HotbarController {
     private String skillNBTKey;
     private String legacyNBTKey;
     private int skillInventoryRows;
-    private MaterialAndData defaultSkillIcon;
-    private String defaultDisabledIconURL;
+
+    private PlayerProfile disabledIcon;
+    private PlayerProfile unknownIcon;
 
     private final Map<UUID, SkillSelector> selectors = new HashMap<>();
 
@@ -72,21 +74,21 @@ public class HotbarController {
             skillNBTKey = "heroesskill";
         }
         legacyNBTKey = config.getString("legacy_nbt_key");
-        defaultDisabledIconURL = config.getString("disabled_icon_url");
+        disabledIcon = CompatibilityUtils.getPlayerProfile("Disabled", config.getString("disabled_icon_url"));
+        unknownIcon = null;
+        CompatibilityUtils.getUnknownIcon(this, UUID.fromString("606e2ff0-ed77-4842-9d6c-e1d3321c7838"));
 
         skillInventoryRows = config.getInt("skill_inventory_max_rows", 6);
-        try {
-            defaultSkillIcon = new MaterialAndData(config.getString("default_skill_icon", "player_head"));
-        } catch (Exception ex) {
-            plugin.getLogger().warning("Invalid icon in config: " + config.getString("default_skill_icon"));
-            defaultSkillIcon = new MaterialAndData(Material.PLAYER_HEAD);
-        }
 
         int hotbarUpdateInterval = config.getInt("update_interval");
         if (hotbarUpdateInterval > 0) {
             final HotbarUpdateTask updateTask = new HotbarUpdateTask(this);
             plugin.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, updateTask, 0, hotbarUpdateInterval);
         }
+    }
+
+    public void setUnknownIcon(PlayerProfile profile) {
+        unknownIcon = profile;
     }
 
     public void clear() {
@@ -142,18 +144,9 @@ public class HotbarController {
 
         updateSkillItem(item, skill, player);
 
-        boolean unavailable = !canUseSkill(player, skill.getKey());
-
         CompatibilityUtils.makeUnbreakable(item);
         CompatibilityUtils.hideFlags(item);
 
-        String iconURL = unavailable ? skill.getDisabledIconURL() : skill.getIconURL();
-
-        if (iconURL == null || iconURL.isEmpty()) {
-            CompatibilityUtils.updateSkullIcon(item, UUID.fromString("606e2ff0-ed77-4842-9d6c-e1d3321c7838"));
-        } else {
-            CompatibilityUtils.updateSkullIcon(item, skill.getKey(), iconURL);
-        }
         return item;
     }
 
@@ -167,6 +160,7 @@ public class HotbarController {
         if (unavailable) {
             CompatibilityUtils.setMetaBoolean(item, "unavailable", true);
         }
+        skill.setProfileState(!unavailable);
 
         // Set display name
         CompatibilityUtils.setDisplayName(item, getSkillTitle(player, skill.getName()));
@@ -507,8 +501,11 @@ public class HotbarController {
         return plugin.getServer();
     }
 
-    public String getDefaultDisabledIconURL() {
-        return defaultDisabledIconURL;
+    public PlayerProfile getDefaultDisabledIcon() {
+        return disabledIcon;
+    }
+    public PlayerProfile getUnknownIcon() {
+        return unknownIcon;
     }
 
     public void delayedInventoryUpdate(final Player player) {
