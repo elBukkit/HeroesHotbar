@@ -63,4 +63,5 @@ cooldown:
 
 costs:
     heroes_mana: "&6$amount &eMana"
+    heroes_stamina: "&6$amount &eStamina"
 

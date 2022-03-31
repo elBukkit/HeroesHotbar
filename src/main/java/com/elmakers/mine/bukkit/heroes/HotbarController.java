@@ -249,6 +249,12 @@ public class HotbarController {
             lore.add(getMessage("skills.costs_description").replace("$description", manaDescription));
         }
 
+        int stamina = SkillConfigManager.getUseSetting(hero, skill, SkillSetting.STAMINA, 0, true);
+        if (stamina > 0) {
+            String staminaDescription = getMessage("costs.heroes_stamina").replace("$amount", Integer.toString(stamina));
+            lore.add(getMessage("skills.costs_description").replace("$description", staminaDescription));
+        }
+
         if (preparedPoints.isPresent() && isPrepared(player, skill.getName())) {
             lore.add(getMessage("skills.unprepare_lore"));
         }
