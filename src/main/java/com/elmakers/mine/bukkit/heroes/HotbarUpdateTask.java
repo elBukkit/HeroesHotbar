@@ -83,27 +83,17 @@ public class HotbarUpdateTask implements Runnable {
             if (targetAmount == 0) targetAmount = 1;
             boolean setAmount = false;
 
-            SkillDescription skillDescription = new SkillDescription(controller, player, skillKey);
+            SkillDescription skillDescription = controller.getSkillDescription(player, skillKey);
 
-            MaterialAndData disabledIcon = skillDescription.getDisabledIcon();
-            MaterialAndData spellIcon = skillDescription.getIcon();
-            if (disabledIcon != null && spellIcon != null) {
-                if (!canUse) {
-                    if (disabledIcon.getMaterial() != skillItem.getType() || disabledIcon.getData() != skillItem.getDurability()) {
-                        disabledIcon.applyToItem(skillItem);
+            if (!canUse) {
+                if (targetAmount == 99) {
+                    if (skillItem.getAmount() != 1) {
+                        skillItem.setAmount(1);
                     }
-                    if (targetAmount == 99) {
-                        if (skillItem.getAmount() != 1) {
-                            skillItem.setAmount(1);
-                        }
-                        setAmount = true;
-                    }
-                } else {
-                    if (spellIcon.getMaterial() != skillItem.getType() || spellIcon.getData() != skillItem.getDurability()) {
-                        spellIcon.applyToItem(skillItem);
-                    }
+                    setAmount = true;
                 }
             }
+            skillDescription.updateIcon(controller, player);
 
             if (!setAmount && skillItem.getAmount() != targetAmount) {
                 skillItem.setAmount(targetAmount);

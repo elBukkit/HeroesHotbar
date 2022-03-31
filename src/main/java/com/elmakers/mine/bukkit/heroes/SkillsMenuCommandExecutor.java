@@ -43,7 +43,7 @@ public class SkillsMenuCommandExecutor implements CommandExecutor {
     }
 
     private void showSkillsMenu(Player player, int page) {
-        SkillSelector selector = new SkillSelector(controller, player);
+        SkillSelector selector = controller.getActiveSkillSelector(player);
         selector.setPage(page);
         selector.openInventory();
     }

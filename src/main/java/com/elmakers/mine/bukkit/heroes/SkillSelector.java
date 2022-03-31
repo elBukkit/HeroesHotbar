@@ -1,9 +1,8 @@
 package com.elmakers.mine.bukkit.heroes;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
+import com.herocraftonline.heroes.characters.skill.Skill;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryAction;
@@ -13,15 +12,18 @@ import org.bukkit.inventory.ItemStack;
 
 import com.elmakers.mine.bukkit.heroes.utilities.CompatibilityUtils;
 
+import javax.annotation.Nullable;
+
 public class SkillSelector {
     private final HotbarController controller;
     private final Player player;
 
     private int page;
-    private List<SkillDescription> allSkills = new ArrayList<>();
+    private Map<String, SkillDescription> allSkills;
     private String inventoryTitle;
 
     public SkillSelector(HotbarController controller, Player player) {
+        this.allSkills= new LinkedHashMap<>();
         this.controller = controller;
         this.player = player;
 
@@ -34,16 +36,17 @@ public class SkillSelector {
                 .replace("$class", classString);
 
         List<String> heroesSkills = controller.getSkillList(player, true, true);
+        List<SkillDescription> descriptions = new LinkedList<>();
         for (String heroesSkill : heroesSkills) {
-            allSkills.add(new SkillDescription(controller, player, heroesSkill));
+            descriptions.add(new SkillDescription(controller, player, heroesSkill));
         }
 
-        if (allSkills.size() == 0) {
+        if (descriptions.size() == 0) {
             player.sendMessage(controller.getMessage("skills.none", "You have no skills"));
             return;
         }
-
-        Collections.sort(allSkills);
+        Collections.sort(descriptions);
+        descriptions.forEach(skill -> allSkills.put(skill.getKey(), skill));
     }
 
     public void setPage(int page) {
@@ -61,8 +64,11 @@ public class SkillSelector {
         int maxIndex = (pageIndex + 1) * inventorySize - 1;
 
         List<SkillDescription> skills = new ArrayList<>();
-        for (int i = startIndex; i <= maxIndex && i < allSkills.size(); i++) {
-            skills.add(allSkills.get(i));
+        Iterator<SkillDescription> iterator = allSkills.values().iterator();
+        int i = startIndex;
+        while(iterator.hasNext() && i <= maxIndex && i < allSkills.size()) {
+            skills.add(iterator.next());
+            i++;
         }
         if (skills.size() == 0) {
             String messageTemplate = controller.getMessage("skills.none_on_page", "No skills on page $page");
@@ -76,15 +82,18 @@ public class SkillSelector {
                 .replace("$pages", Integer.toString(numPages))
                 .replace("$page", Integer.toString(page));
         Inventory displayInventory = CompatibilityUtils.createInventory(null, invSize, title);
+
         for (SkillDescription skill : skills) {
-            ItemStack skillItem = controller.createSkillItem(skill, player);
-            if (skillItem == null) continue;
-            displayInventory.addItem(skillItem);
+            displayInventory.addItem(skill.getIcon());
         }
 
         player.closeInventory();
         player.openInventory(displayInventory);
-        controller.setActiveSkillSelector(player, this);
+    }
+
+    @Nullable
+    public SkillDescription getSkill(String skillName) {
+        return this.allSkills.get(skillName);
     }
 
     public void onClick(InventoryClickEvent event) {

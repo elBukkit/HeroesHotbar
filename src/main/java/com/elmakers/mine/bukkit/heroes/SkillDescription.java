@@ -1,8 +1,17 @@
 package com.elmakers.mine.bukkit.heroes;
 
+import com.elmakers.mine.bukkit.heroes.utilities.CompatibilityUtils;
+import com.herocraftonline.heroes.characters.Hero;
+import com.herocraftonline.heroes.characters.skill.PassiveSkill;
 import com.herocraftonline.heroes.characters.skill.Skill;
 import com.herocraftonline.heroes.characters.skill.SkillConfigManager;
+import com.herocraftonline.heroes.characters.skill.SkillSetting;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+
+import java.util.List;
+import java.util.OptionalInt;
 
 public class SkillDescription implements Comparable<SkillDescription> {
     private final String skillKey;
@@ -10,34 +19,19 @@ public class SkillDescription implements Comparable<SkillDescription> {
     private final String description;
     private final Skill skill;
     private final int skillLevel;
-    private final MaterialAndData icon;
-    private final MaterialAndData disabledIcon;
     private final String iconURL;
     private final String disabledIconURL;
+    private ItemStack icon;
 
     public SkillDescription(HotbarController controller, Player player, String skillKey) {
         this.skill = controller.getSkill(skillKey);
         this.skillKey = skillKey;
         this.skillLevel = controller.getSkillLevel(player, skillKey);
 
-        String icon = skill == null ? null : SkillConfigManager.getRaw(skill, "icon", null);
-        String iconURL = skill == null ? null : SkillConfigManager.getRaw(skill, "icon-url", SkillConfigManager.getRaw(skill, "icon_url", null));
-        if (icon != null && icon.startsWith("http://")) {
-            iconURL = icon;
-            icon = null;
-            //controller.getLogger().warning("Skull icons are no longer supported");
-        }
-        this.iconURL = iconURL;
-        this.icon = icon == null || icon.isEmpty() ? null : new MaterialAndData(icon);
+        this.iconURL = skill == null ? null : SkillConfigManager.getRaw(skill, "icon-url", SkillConfigManager.getRaw(skill, "icon_url", null));
+
 
         String iconDisabledURL = skill == null ? null : SkillConfigManager.getRaw(skill, "icon-disabled-url", SkillConfigManager.getRaw(skill, "icon_disabled_url", null));
-        String iconDisabled = skill == null ? null : SkillConfigManager.getRaw(skill, "icon-disabled", SkillConfigManager.getRaw(skill, "icon_disabled", null));
-        if (iconDisabled != null && iconDisabled.startsWith("http://")) {
-            iconDisabled = null;
-            iconDisabledURL = icon;
-        }
-
-        this.disabledIcon = iconDisabled == null || iconDisabled.isEmpty() ? null : new MaterialAndData(iconDisabled);
 
         if (iconDisabledURL == null) {
             iconDisabledURL = controller.getDefaultDisabledIconURL();
@@ -48,6 +42,8 @@ public class SkillDescription implements Comparable<SkillDescription> {
         String skillDisplayName = skill == null ? null : SkillConfigManager.getRaw(skill, "name", skill.getName());
         this.name = skillDisplayName == null || skillDisplayName.isEmpty() ? skillKey : skillDisplayName;
         this.description = skill == null ? null : SkillConfigManager.getRaw(skill, "description", "");
+
+        this.icon = controller.getSkillItem(this, player);
     }
 
     public boolean isHeroes() {
@@ -62,7 +58,17 @@ public class SkillDescription implements Comparable<SkillDescription> {
         return getName().compareTo(other.getName());
     }
 
-    public MaterialAndData getIcon() {
+    /**
+     * Gets icon associated with this skill description
+     * @return A disabled icon if skill cannot be used or proper icon if it can be used
+     */
+    public ItemStack getIcon() {
+        return icon;
+    }
+
+    public ItemStack updateIcon(HotbarController controller, Player player) {
+        //fixme: Technically speaking, the code to generate the skull item SHOULD be here not in controller. But anyway
+        icon = controller.getSkillItem(this, player);
         return icon;
     }
 
@@ -72,10 +78,6 @@ public class SkillDescription implements Comparable<SkillDescription> {
 
     public String getDisabledIconURL() {
         return disabledIconURL;
-    }
-
-    public MaterialAndData getDisabledIcon() {
-        return disabledIcon;
     }
 
     public String getName() {

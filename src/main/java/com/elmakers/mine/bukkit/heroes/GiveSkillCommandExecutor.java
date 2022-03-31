@@ -44,13 +44,14 @@ public class GiveSkillCommandExecutor implements CommandExecutor {
         }
 
         String skillName = args.length > 1 ? args[1] : args[0];
-        SkillDescription skillDescription = new SkillDescription(controller, player, skillName);
+
+        SkillDescription skillDescription = controller.getSkillDescription(player, skillName);
         if (!skillDescription.isValid()) {
             sender.sendMessage(ChatColor.RED + "Unknown skill: " + skillName);
             return true;
         }
 
-        ItemStack item = controller.createSkillItem(skillDescription, player);
+        ItemStack item = skillDescription.getIcon();
         player.getInventory().addItem(item);
         sender.sendMessage(ChatColor.LIGHT_PURPLE + "Gave skill " + skillName + " to " + player.getName());
         return true;

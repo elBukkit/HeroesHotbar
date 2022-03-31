@@ -118,9 +118,4 @@ public class InventoryListener implements Listener {
             return;
         }
     }
-
-    @EventHandler
-    public void onInventoryClose(InventoryCloseEvent event) {
-        controller.clearActiveSkillSelector(event.getPlayer());
-    }
 }

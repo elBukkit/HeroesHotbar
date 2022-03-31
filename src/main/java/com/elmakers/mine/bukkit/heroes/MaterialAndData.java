@@ -101,12 +101,6 @@ public class MaterialAndData {
         item.setItemMeta(meta);
     }
 
-    public ItemStack createItemStack() {
-        ItemStack itemStack = new ItemStack(material, 1);
-        applyToItem(itemStack);
-        return itemStack;
-    }
-
     private static Gson getGson() {
         if (gson == null) {
             gson = new Gson();
