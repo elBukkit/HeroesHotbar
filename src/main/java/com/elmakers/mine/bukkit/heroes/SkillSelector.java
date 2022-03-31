@@ -11,6 +11,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import com.elmakers.mine.bukkit.heroes.utilities.CompatibilityUtils;
+import org.checkerframework.checker.units.qual.A;
 
 import javax.annotation.Nullable;
 
@@ -32,6 +33,21 @@ public class SkillSelector {
     }
 
     public void updateSkills() {
+        getAllSkills().forEach(skill -> {
+            allSkills.put(skill.getKey(), skill);
+        });
+    }
+
+    public void updateSkillsForLevelUp() { //Need to update lore, and availability as well, updateSkills is used initially
+        getAllSkills().forEach(skill -> {
+            controller.updateSkillItem(skill.getIcon(), skill, player);
+            List<String> lore = new ArrayList<>();
+            controller.addSkillLore(skill, lore, player);
+            allSkills.put(skill.getKey(), skill);
+        });
+    }
+
+    public List<SkillDescription> getAllSkills() {
         this.allSkills = new LinkedHashMap<>();
         String classString = controller.getClassName(player);
         String class2String = controller.getSecondaryClassName(player);
@@ -49,10 +65,9 @@ public class SkillSelector {
 
         if (descriptions.size() == 0) {
             player.sendMessage(controller.getMessage("skills.none", "You have no skills"));
-            return;
         }
         Collections.sort(descriptions);
-        descriptions.forEach(skill -> allSkills.put(skill.getKey(), skill));
+        return descriptions;
     }
 
     public void setPage(int page) {

@@ -93,7 +93,7 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onLevelUp(HeroChangeLevelEvent event) {
-        controller.getActiveSkillSelector(event.getHero().getPlayer()).updateSkills();
+        controller.getActiveSkillSelector(event.getHero().getPlayer()).updateSkillsForLevelUp();
     }
 
     @EventHandler

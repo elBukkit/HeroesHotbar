@@ -53,14 +53,19 @@ public class InventoryListener implements Listener {
             // Only cancel event if in the skill selector
             if (skillSelector.isGuiOpen()) {
                 event.setCancelled(true);
+                return;
             }
-            return;
         }
 
         // Check for wearing skills, do not allow
         ItemStack heldItem = event.getCursor();
         boolean heldSkill = controller.isSkill(heldItem);
+        boolean isMove = event.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY;
         if (heldSkill && event.getSlotType() == InventoryType.SlotType.ARMOR) {
+            event.setCancelled(true);
+            return;
+        }
+        if(heldSkill && isMove && (event.getClick() == ClickType.SHIFT_LEFT)) {
             event.setCancelled(true);
             return;
         }
@@ -77,7 +82,7 @@ public class InventoryListener implements Listener {
 
         // Clicking a skill prepares it
 
-        boolean isMove = event.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY;
+
         if (event.getAction() == InventoryAction.PICKUP_ALL || isHotbar || isMove) {
             if (player instanceof Player) {
                 if (!controller.prepareSkill((Player) player, clickedItem)) {
@@ -90,10 +95,9 @@ public class InventoryListener implements Listener {
                 // Just prepare but don't grab, if the skill inventory is open and we already have this skill
                 if (!event.isCancelled() && skillSelector.isGuiOpen() && controller.hasSkillItem((Player)player, controller.getSkillKey(clickedItem))) {
                     event.setCancelled(true);
+                    return;
                 }
             }
-
-            return;
         }
 
         // Delegate to skill selector
@@ -103,14 +107,16 @@ public class InventoryListener implements Listener {
         }
 
         // Preventing putting skills in containers
-        InventoryType inventoryType = event.getInventory().getType();
+        if(event.getClickedInventory() == null) {
+            return;
+        }
+        InventoryType inventoryType = event.getClickedInventory().getType();
         boolean isPlayerInventory = inventoryType == InventoryType.CRAFTING || inventoryType == InventoryType.PLAYER;
         isSkill = isSkill || controller.isLegacySkill(clickedItem);
         if (isSkill && !isPlayerInventory) {
-            if (!isDrop) {
+            if (isDrop) {
                 event.setCancelled(true);
             }
-            return;
         }
     }
 }

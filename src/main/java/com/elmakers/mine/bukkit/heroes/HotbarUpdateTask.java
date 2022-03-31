@@ -115,7 +115,6 @@ public class HotbarUpdateTask implements Runnable {
                     }
                     setAmount = true;
                 }
-                controller.updateSkillItem(skillItem, skillDescription, player);
             }
 
             if (!setAmount && skillItem.getAmount() != targetAmount) {
