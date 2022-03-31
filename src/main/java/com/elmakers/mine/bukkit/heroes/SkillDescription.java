@@ -65,6 +65,14 @@ public class SkillDescription implements Comparable<SkillDescription> {
         return icon;
     }
 
+    public String getIconURL() {
+        return iconURL;
+    }
+
+    public String getDisabledIconURL() {
+        return disabledIconURL;
+    }
+
     public MaterialAndData getDisabledIcon() {
         return disabledIcon;
     }

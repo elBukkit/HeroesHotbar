@@ -15,7 +15,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<version.java>11</version.java>
-		<bukkit.version>1.14.4-R0.1-SNAPSHOT</bukkit.version>
+		<spigot.version>1.18.2-R0.1-SNAPSHOT</spigot.version>
 	</properties>
 
 	<licenses>
@@ -65,15 +65,20 @@
 		</repository>
 		<repository>
 			<id>heroes-repo</id>
-			<url>https://nexus.hc.to/content/repositories/herocraft/</url>
+			<url>https://nexus.hc.to/content/repositories/pub_releases/</url>
+		</repository>
+
+		<repository>
+			<id>spigot-repo</id>
+			<url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
 		</repository>
 	</repositories>
 
 	<dependencies>
 		<dependency>
-			<groupId>org.bukkit</groupId>
-			<artifactId>bukkit</artifactId>
-			<version>${bukkit.version}</version>
+			<groupId>org.spigotmc</groupId>
+			<artifactId>spigot-api</artifactId>
+			<version>${spigot.version}</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -81,7 +86,7 @@
 		<dependency>
 			<groupId>com.herocraftonline.heroes</groupId>
 			<artifactId>Heroes</artifactId>
-			<version>1.9.18-SNAPSHOT</version>
+			<version>1.9.19-RELEASE</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>

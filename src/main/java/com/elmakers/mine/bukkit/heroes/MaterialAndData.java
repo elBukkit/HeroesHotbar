@@ -7,12 +7,12 @@ import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 
-@SuppressWarnings("deprecation")
 public class MaterialAndData {
     protected static Gson gson;
     private final Material material;
@@ -93,16 +93,16 @@ public class MaterialAndData {
 
     public void applyToItem(ItemStack item) {
         item.setType(material);
-        item.setDurability(data);
+        ItemMeta meta = item.getItemMeta();
+        ((Damageable)meta).setDamage(data);
         if (customData > 0) {
-            ItemMeta meta = item.getItemMeta();
             meta.setCustomModelData(customData);
-            item.setItemMeta(meta);
         }
+        item.setItemMeta(meta);
     }
 
     public ItemStack createItemStack() {
-        ItemStack itemStack = new ItemStack(material, 1, data);
+        ItemStack itemStack = new ItemStack(material, 1);
         applyToItem(itemStack);
         return itemStack;
     }
