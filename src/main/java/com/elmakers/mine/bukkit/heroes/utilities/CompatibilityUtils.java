@@ -1,19 +1,29 @@
 package com.elmakers.mine.bukkit.heroes.utilities;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Collection;
 import java.util.List;
+import java.util.logging.Level;
 
+import com.elmakers.mine.bukkit.heroes.SkillDescription;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.profile.PlayerProfile;
+import org.bukkit.profile.PlayerTextures;
+
+import javax.annotation.Nullable;
 
 public class CompatibilityUtils {
     private static Plugin plugin;
@@ -134,5 +144,26 @@ public class CompatibilityUtils {
 
             list.add(colorPrefix + line);
         }
+    }
+
+    @Nullable
+    public static ItemStack getSkullIcon(String name, String url) {
+        ItemStack skull = new ItemStack(Material.PLAYER_HEAD, 1);
+        SkullMeta meta = (SkullMeta)skull.getItemMeta();
+
+        PlayerProfile profile = plugin.getServer().createPlayerProfile(name);
+        PlayerTextures texture = profile.getTextures();
+        try {
+            texture.setSkin(new URL(url));
+        }
+        catch(MalformedURLException e) {
+            plugin.getLogger().log(Level.WARNING, () -> "Url was malformed for skill icon " + name);
+            return null;
+        }
+        profile.setTextures(texture);
+        meta.setOwnerProfile(profile);
+        skull.setItemMeta(meta);
+
+        return skull;
     }
 }

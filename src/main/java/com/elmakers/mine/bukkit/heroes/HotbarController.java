@@ -18,11 +18,14 @@ import java.util.logging.Logger;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Server;
+import org.bukkit.block.Block;
+import org.bukkit.block.Skull;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.plugin.Plugin;
 
 import com.elmakers.mine.bukkit.heroes.utilities.CompatibilityUtils;
@@ -122,6 +125,7 @@ public class HotbarController {
     public ItemStack createSkillItem(SkillDescription skill, Player player) {
         ItemStack item = null;
         MaterialAndData icon = skill.getIcon();
+        String iconURL = skill.getIconURL();
         if (icon == null) {
             icon = defaultSkillIcon;
         }
@@ -132,8 +136,17 @@ public class HotbarController {
             if (disabledIcon != null) {
                 icon = disabledIcon;
             }
+            String disabledIconURL = skill.getDisabledIconURL();
+            if (disabledIconURL != null && !disabledIconURL.isEmpty()) {
+                iconURL = disabledIconURL;
+            }
         }
-        item = icon.createItemStack();
+
+        if (iconURL != null && !iconURL.isEmpty()) {
+            item = CompatibilityUtils.getSkullIcon(skill.getKey(), iconURL);
+        } else {
+            item = icon.createItemStack();
+        }
         if (item == null) {
             plugin.getLogger().warning("Unable to create item stack for skill: " + skill.getName());
             return null;
