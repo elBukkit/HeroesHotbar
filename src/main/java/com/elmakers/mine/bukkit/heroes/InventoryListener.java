@@ -35,13 +35,12 @@ public class InventoryListener implements Listener {
 
         boolean isSkill = clickedItem != null && controller.isSkill(clickedItem);
         boolean isDrop = event.getClick() == ClickType.DROP || event.getClick() == ClickType.CONTROL_DROP;
-        InventoryAction action = event.getAction();
-        SkillSelector skillSelector = controller.getActiveSkillSelector(event.getWhoClicked());
+        boolean isGuiOpen = controller.isGuiOpen((Player) player);
 
         // Check for right-click-to-prepare
-        boolean isRightClick = action == InventoryAction.PICKUP_HALF;
+        boolean isRightClick = event.getClick() == ClickType.RIGHT;
         if (isSkill && isRightClick) {
-            controller.unprepareSkill((Player) player, clickedItem);
+            controller.prepareSkill((Player) player, clickedItem);
             event.setCancelled(true);
             return;
         }
@@ -51,7 +50,7 @@ public class InventoryListener implements Listener {
             controller.unprepareSkill((Player) player, clickedItem);
 
             // Only cancel event if in the skill selector
-            if (skillSelector.isGuiOpen()) {
+            if (isGuiOpen) {
                 event.setCancelled(true);
                 return;
             }
@@ -65,7 +64,8 @@ public class InventoryListener implements Listener {
             event.setCancelled(true);
             return;
         }
-        if(heldSkill && isMove && (event.getClick() == ClickType.SHIFT_LEFT)) {
+        //Shift clicking into inventory
+        if(isSkill && isMove && (event.getClick() == ClickType.SHIFT_LEFT || event.getClick() == ClickType.SHIFT_RIGHT)) {
             event.setCancelled(true);
             return;
         }
@@ -84,25 +84,23 @@ public class InventoryListener implements Listener {
 
 
         if (event.getAction() == InventoryAction.PICKUP_ALL || isHotbar || isMove) {
-            if (player instanceof Player) {
-                if (!controller.prepareSkill((Player) player, clickedItem)) {
-                    event.setCancelled(true);
-                } else if (isMove) {
-                    // This is needed for the item name and lore to update when shift+clicking
-                    controller.delayedInventoryUpdate((Player)player);
-                }
+            if (!controller.prepareSkill((Player) player, clickedItem)) {
+                event.setCancelled(true);
+            } else if (isMove) {
+                // This is needed for the item name and lore to update when shift+clicking
+                controller.delayedInventoryUpdate((Player)player);
+            }
 
-                // Just prepare but don't grab, if the skill inventory is open and we already have this skill
-                if (!event.isCancelled() && skillSelector.isGuiOpen() && controller.hasSkillItem((Player)player, controller.getSkillKey(clickedItem))) {
-                    event.setCancelled(true);
-                    return;
-                }
+            // Just prepare but don't grab, if the skill inventory is open and we already have this skill
+            if (!event.isCancelled() && isGuiOpen && controller.hasSkillItem((Player)player, controller.getSkillKey(clickedItem))) {
+                event.setCancelled(true);
+                return;
             }
         }
 
         // Delegate to skill selector
-        if (skillSelector.isGuiOpen()) {
-            skillSelector.onClick(event);
+        if (isGuiOpen) {
+            controller.getActiveSkillSelector(player).onClick(event);
             return;
         }
 
@@ -111,10 +109,11 @@ public class InventoryListener implements Listener {
             return;
         }
         InventoryType inventoryType = event.getClickedInventory().getType();
-        boolean isPlayerInventory = inventoryType == InventoryType.CRAFTING || inventoryType == InventoryType.PLAYER;
-        isSkill = isSkill || controller.isLegacySkill(clickedItem);
-        if (isSkill && !isPlayerInventory) {
-            if (isDrop) {
+        boolean isPlayerInventory = inventoryType == InventoryType.PLAYER;
+        heldSkill = heldSkill || controller.isLegacySkill(clickedItem);
+        if (heldSkill && !isPlayerInventory) {
+            ClickType click = event.getClick();
+            if (click == ClickType.LEFT || click == ClickType.RIGHT) {
                 event.setCancelled(true);
             }
         }
