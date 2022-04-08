@@ -25,7 +25,7 @@ public class HotbarUpdateTask implements Runnable {
                 updateHotbar(player);
             }
         } catch (Exception ex) {
-            controller.getLogger().log(Level.WARNING, "Error updating hotbar", ex);
+            controller.getLogger().log(Level.WARNING, "Error updating hotbar", ex.toString());
         }
     }
 
@@ -61,6 +61,7 @@ public class HotbarUpdateTask implements Runnable {
         Inventory inv = player.getInventory();
         for (int i = 0; i < 9; i++) {
             ItemStack skillItem = inv.getItem(i);
+            if(skillItem == null || skillItem.getType().isAir()) continue;
             String skillKey = controller.getSkillKey(skillItem);
             if (skillKey == null || skillKey.isEmpty()) continue;
 
