@@ -104,20 +104,21 @@ public class HotbarUpdateTask implements Runnable {
             boolean setAmount = false;
 
             SkillDescription skillDescription = controller.getSkillDescription(player, skillKey);
-
-            if (!canUse) {
-                if (targetAmount == 99) {
-                    if (skillItem.getAmount() != 1) {
-                        skillItem.setAmount(1);
+            if(skillDescription != null) {
+                if (!canUse) {
+                    if (targetAmount == 99) {
+                        if (skillItem.getAmount() != 1) {
+                            skillItem.setAmount(1);
+                        }
+                        setAmount = true;
                     }
-                    setAmount = true;
                 }
-            }
 
-            if (!setAmount && skillItem.getAmount() != targetAmount) {
-                skillItem.setAmount(targetAmount);
+                if (!setAmount && skillItem.getAmount() != targetAmount) {
+                    skillItem.setAmount(targetAmount);
+                }
+                skillDescription.setProfileState(skillItem, canUse);
             }
-            skillDescription.setProfileState(skillItem, canUse);
         }
     }
 }

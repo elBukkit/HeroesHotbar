@@ -95,11 +95,17 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onLevelUp(HeroChangeLevelEvent event) {
-        controller.getActiveSkillSelector(event.getHero().getPlayer()).updateSkillsForLevelUp();
+        SkillSelector selector = controller.getActiveSkillSelector(event.getHero().getPlayer());
+        if(selector != null) {
+            selector.updateSkillsForLevelUp();
+        }
     }
 
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent e) {
-        controller.getActiveSkillSelector(e.getPlayer()).setGuiState(false);
+        SkillSelector selector = controller.getActiveSkillSelector(e.getPlayer());
+        if(selector != null) {
+            selector.setGuiState(false);
+        }
     }
 }

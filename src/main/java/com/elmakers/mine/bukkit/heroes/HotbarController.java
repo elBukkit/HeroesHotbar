@@ -39,6 +39,8 @@ import com.herocraftonline.heroes.characters.skill.SkillManager;
 import com.herocraftonline.heroes.characters.skill.SkillSetting;
 import org.bukkit.profile.PlayerProfile;
 
+import javax.annotation.Nullable;
+
 /**
  * This class manages the centralized hotbar functionality.
  */
@@ -118,13 +120,17 @@ public class HotbarController {
         return nameTemplate.replace("$skill", skillName);
     }
 
+    @Nullable
     public SkillDescription getSkillDescription(Player player, String skillName) {
-        SkillSelector selector = getActiveSkillSelector(player); //Will never be null
-        SkillDescription description = selector.getSkill(skillName);
-        if(description == null) {
-            this.getLogger().warning("Skill " + skillName + " has not been added to " + player.getName() + "'s skill selector!");
+        SkillSelector selector = getActiveSkillSelector(player);
+        SkillDescription description = null;
+        if(selector != null) {
+            description = selector.getSkill(skillName);
+            if(description == null) {
+                this.getLogger().warning("Skill " + skillName + " has not been added to " + player.getName() + "'s skill selector!");
+            }
         }
-        return description;
+        return description; //Null if selector is null or if skill name has not been added!
     }
 
     public boolean isGuiOpen(Player player) {
@@ -376,6 +382,12 @@ public class HotbarController {
         return hero.isSkillPrepared(skillName) || !hero.getSkillPrepareCost(skillName).isPresent();
     }
 
+    /**
+     * Gets active selector for player, may result in null if player is offline.
+     * @param player
+     * @return Skill selector for player, or null if player does not have one.
+     */
+    @Nullable
     public SkillSelector getActiveSkillSelector(HumanEntity player) {
         return selectors.get(player.getUniqueId());
     }
