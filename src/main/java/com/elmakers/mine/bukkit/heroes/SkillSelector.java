@@ -1,6 +1,7 @@
 package com.elmakers.mine.bukkit.heroes;
 
 import java.util.*;
+import java.util.logging.Level;
 
 import com.herocraftonline.heroes.characters.skill.Skill;
 import org.bukkit.entity.Player;
@@ -66,7 +67,13 @@ public class SkillSelector {
         if (descriptions.size() == 0) {
             player.sendMessage(controller.getMessage("skills.none", "You have no skills"));
         }
-        Collections.sort(descriptions);
+
+        try {
+            Collections.sort(descriptions);
+        }
+        catch(ClassCastException e) {
+            controller.getLogger().log(Level.WARNING, "Could not sort skill descriptions!");
+        }
         return descriptions;
     }
 

@@ -377,13 +377,12 @@ public class HotbarController {
     }
 
     public SkillSelector getActiveSkillSelector(HumanEntity player) {
-        return selectors.containsKey(player.getUniqueId()) ? selectors.get(player.getUniqueId()) : addActiveSkillSelector(player);
+        return selectors.get(player.getUniqueId());
     }
 
-    public SkillSelector addActiveSkillSelector(HumanEntity player) {
+    public void addActiveSkillSelector(HumanEntity player) {
         SkillSelector selector = new SkillSelector(this, (Player) player);
         selectors.put(player.getUniqueId(), selector);
-        return selector;
     }
 
     public void clearActiveSkillSelector(Player player) {

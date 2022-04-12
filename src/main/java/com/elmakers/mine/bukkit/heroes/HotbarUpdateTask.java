@@ -20,12 +20,8 @@ public class HotbarUpdateTask implements Runnable {
 
     @Override
     public void run() {
-        try {
-            for (Player player : controller.getServer().getOnlinePlayers()) {
-                updateHotbar(player);
-            }
-        } catch (Exception ex) {
-            controller.getLogger().log(Level.WARNING, "Error updating hotbar", ex.toString());
+        for (Player player : controller.getServer().getOnlinePlayers()) {
+            updateHotbar(player);
         }
     }
 
