@@ -1,6 +1,4 @@
-package com.elmakers.mine.bukkit.heroes;
-
-import java.util.logging.Level;
+package com.elmakers.mine.bukkit.heroes.controller;
 
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;

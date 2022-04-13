@@ -1,20 +1,12 @@
-package com.elmakers.mine.bukkit.heroes;
+package com.elmakers.mine.bukkit.heroes.controller;
 
 import com.elmakers.mine.bukkit.heroes.utilities.CompatibilityUtils;
-import com.herocraftonline.heroes.characters.Hero;
-import com.herocraftonline.heroes.characters.skill.PassiveSkill;
 import com.herocraftonline.heroes.characters.skill.Skill;
 import com.herocraftonline.heroes.characters.skill.SkillConfigManager;
-import com.herocraftonline.heroes.characters.skill.SkillSetting;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.profile.PlayerProfile;
-
-import java.util.List;
-import java.util.OptionalInt;
-import java.util.UUID;
 
 public class SkillDescription implements Comparable<SkillDescription> {
     private final String skillKey;

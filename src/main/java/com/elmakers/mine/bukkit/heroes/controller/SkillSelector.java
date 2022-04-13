@@ -1,18 +1,17 @@
-package com.elmakers.mine.bukkit.heroes;
+package com.elmakers.mine.bukkit.heroes.controller;
 
 import java.util.*;
 import java.util.logging.Level;
 
-import com.herocraftonline.heroes.characters.skill.Skill;
+import com.elmakers.mine.bukkit.heroes.controller.HotbarController;
+import com.elmakers.mine.bukkit.heroes.controller.SkillDescription;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 
 import com.elmakers.mine.bukkit.heroes.utilities.CompatibilityUtils;
-import org.checkerframework.checker.units.qual.A;
 
 import javax.annotation.Nullable;
 

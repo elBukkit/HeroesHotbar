@@ -1,5 +1,6 @@
-package com.elmakers.mine.bukkit.heroes;
+package com.elmakers.mine.bukkit.heroes.listener;
 
+import com.elmakers.mine.bukkit.heroes.controller.HotbarController;
 import com.elmakers.mine.bukkit.heroes.utilities.CompatibilityUtils;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;

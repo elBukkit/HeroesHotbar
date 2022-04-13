@@ -1,5 +1,10 @@
 package com.elmakers.mine.bukkit.heroes;
 
+import com.elmakers.mine.bukkit.heroes.command.GiveSkillCommandExecutor;
+import com.elmakers.mine.bukkit.heroes.command.SkillsMenuCommandExecutor;
+import com.elmakers.mine.bukkit.heroes.controller.HotbarController;
+import com.elmakers.mine.bukkit.heroes.listener.InventoryListener;
+import com.elmakers.mine.bukkit.heroes.listener.PlayerListener;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandExecutor;

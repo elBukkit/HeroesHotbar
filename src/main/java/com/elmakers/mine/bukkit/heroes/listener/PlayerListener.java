@@ -1,5 +1,7 @@
-package com.elmakers.mine.bukkit.heroes;
+package com.elmakers.mine.bukkit.heroes.listener;
 
+import com.elmakers.mine.bukkit.heroes.controller.HotbarController;
+import com.elmakers.mine.bukkit.heroes.controller.SkillSelector;
 import com.herocraftonline.heroes.api.events.HeroChangeLevelEvent;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;

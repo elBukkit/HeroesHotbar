@@ -1,4 +1,4 @@
-package com.elmakers.mine.bukkit.heroes;
+package com.elmakers.mine.bukkit.heroes.controller;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;

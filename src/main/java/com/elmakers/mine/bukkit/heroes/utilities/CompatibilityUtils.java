@@ -5,15 +5,12 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 
-import com.elmakers.mine.bukkit.heroes.HotbarController;
-import com.elmakers.mine.bukkit.heroes.SkillDescription;
+import com.elmakers.mine.bukkit.heroes.controller.HotbarController;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
@@ -25,8 +22,6 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.profile.PlayerProfile;
 import org.bukkit.profile.PlayerTextures;
-
-import javax.annotation.Nullable;
 
 public class CompatibilityUtils {
     private static Plugin plugin;
