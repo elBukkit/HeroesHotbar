@@ -2,6 +2,7 @@ package com.elmakers.mine.bukkit.heroes.listener;
 
 import com.elmakers.mine.bukkit.heroes.controller.HotbarController;
 import com.elmakers.mine.bukkit.heroes.controller.SkillSelector;
+import com.herocraftonline.heroes.api.events.AfterClassChangeEvent;
 import com.herocraftonline.heroes.api.events.HeroChangeLevelEvent;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
@@ -43,7 +44,7 @@ public class PlayerListener implements Listener {
 
         // Catch lag-related glitches dropping items from GUIs
         SkillSelector selector = controller.getActiveSkillSelector(player);
-        if (selector.isGuiOpen()) {
+        if (selector != null && selector.isGuiOpen()) {
             event.setCancelled(true);
         }
     }
@@ -100,6 +101,19 @@ public class PlayerListener implements Listener {
         SkillSelector selector = controller.getActiveSkillSelector(event.getHero().getPlayer());
         if(selector != null) {
             selector.updateSkillsForLevelUp();
+        }
+    }
+
+    @EventHandler
+    public void onClassChange(AfterClassChangeEvent event) {
+        Player player = event.getHero().getPlayer();
+        SkillSelector selector = controller.getActiveSkillSelector(player);
+        if(selector != null) {
+            selector.refreshAllSkills();
+            controller.removeAllSkillItems(player);
+        }
+        else {
+            controller.addActiveSkillSelector(event.getHero().getPlayer());
         }
     }
 

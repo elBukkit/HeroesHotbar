@@ -33,12 +33,12 @@ public class SkillSelector {
     }
 
     public void updateSkills() {
-        getAllSkills().forEach(skill -> {
-            allSkills.put(skill.getKey(), skill);
-        });
+        this.allSkills = new LinkedHashMap<>();
+        getAllSkills().forEach(skill -> allSkills.put(skill.getKey(), skill));
     }
 
     public void updateSkillsForLevelUp() { //Need to update lore, and availability as well, updateSkills is used initially
+        this.allSkills = new LinkedHashMap<>();
         getAllSkills().forEach(skill -> {
             controller.updateSkillItem(skill.getIcon(), skill, player);
             List<String> lore = new ArrayList<>();
@@ -47,8 +47,13 @@ public class SkillSelector {
         });
     }
 
-    public List<SkillDescription> getAllSkills() {
+    //Resets all skills and recalculates them. This should only ever be called on a class change.
+    public void refreshAllSkills() {
         this.allSkills = new LinkedHashMap<>();
+        getAllSkills().forEach(skill -> allSkills.put(skill.getKey(), skill));
+    }
+
+    public List<SkillDescription> getAllSkills() {
         String classString = controller.getClassName(player);
         String class2String = controller.getSecondaryClassName(player);
         String messageKey = !class2String.isEmpty() ? "skills.inventory_title_secondary" : "skills.inventory_title";

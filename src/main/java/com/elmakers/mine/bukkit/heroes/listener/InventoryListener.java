@@ -49,7 +49,7 @@ public class InventoryListener implements Listener {
         // Drop key unprepares
         if (isSkill && isDrop) {
             controller.unprepareSkill((Player) player, clickedItem);
-
+            player.getInventory().setItem(event.getSlot(), null);
             // Only cancel event if in the skill selector
             if (isGuiOpen) {
                 event.setCancelled(true);

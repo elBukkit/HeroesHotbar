@@ -126,9 +126,6 @@ public class HotbarController {
         SkillDescription description = null;
         if(selector != null) {
             description = selector.getSkill(skillName);
-            if(description == null) {
-                this.getLogger().warning("Skill " + skillName + " has not been added to " + player.getName() + "'s skill selector!");
-            }
         }
         return description; //Null if selector is null or if skill name has not been added!
     }
@@ -416,46 +413,58 @@ public class HotbarController {
         }
     }
 
+    public void removeAllSkillItems(Player player) {
+        Inventory inventory = player.getInventory();
+        for (int i = 0; i < inventory.getSize(); i++) {
+            ItemStack slotItem = inventory.getItem(i);
+            String slotKey = getSkillKey(slotItem);
+            if (slotKey != null) {
+                unprepareSkill(slotKey, player, slotItem);
+                inventory.setItem(i, null);
+            }
+        }
+    }
+
+    /**
+     * Attempts to unprepare a skill IF the item is a skill item. Does not remove the item
+     * @param player
+     * @param item The item which may or may not be a skill
+     */
     public void unprepareSkill(Player player, ItemStack item) {
         String skillKey = getSkillKey(item);
         if (skillKey != null && !skillKey.isEmpty()) {
+            unprepareSkill(skillKey, player, item);
+        }
+    }
 
-            // Always take all of the items away here, players can use this to
-            // "unprepare" skills that don't need preparing just to clean them out of their inventory
-            // Only do this if the skill selector is active.
-            SkillSelector activeSelector = getActiveSkillSelector(player);
-            Inventory inventory = player.getInventory();
-            for (int i = 0; i < inventory.getSize(); i++) {
-                ItemStack slotItem = inventory.getItem(i);
-                String slotKey = getSkillKey(slotItem);
-                if (slotKey != null && slotKey.equals(skillKey)) {
-                    inventory.setItem(i, null);
-                }
-            }
+    public void unprepareSkill(String skillKey, Player player, ItemStack item) {
+        // Always take all of the items away here, players can use this to
+        // "unprepare" skills that don't need preparing just to clean them out of their inventory
+        // Only do this if the skill selector is active.
+        SkillSelector activeSelector = getActiveSkillSelector(player);
 
-            // Make sure this skill can be unprepared
-            Hero hero = getHero(player);
-            Skill skill = getSkill(skillKey);
-            OptionalInt preparedPoints = hero.getSkillPrepareCost(skill);
-            if (preparedPoints.isPresent() && hero.isSkillPrepared(skillKey)) {
-                // Unprepare it, update item name
-                hero.unprepareSkill(skill);
-                CompatibilityUtils.setDisplayName(item, getSkillTitle(player, skillKey));
+        // Make sure this skill can be unprepared
+        Hero hero = getHero(player);
+        Skill skill = getSkill(skillKey);
+        OptionalInt preparedPoints = hero.getSkillPrepareCost(skill);
+        if (preparedPoints.isPresent() && hero.isSkillPrepared(skillKey)) {
+            // Unprepare it, update item name
+            hero.unprepareSkill(skill);
+            CompatibilityUtils.setDisplayName(item, getSkillTitle(player, skillKey));
 
-                updateSkillLore(activeSelector.getSkill(skillKey), player);
+            updateSkillLore(activeSelector.getSkill(skillKey), player);
 
-                // Message the player
-                int usedPoints = hero.getUsedSkillPreparePoints();
-                int maxPoints = hero.getTotalSkillPreparePoints();
-                int maxPrepared = hero.getPreparedSkillLimit();
-                int currentPrepared = hero.getPreparedSkillCount();
-                int remainingPoints = maxPoints - usedPoints;
-                int remainingSlots = maxPrepared - currentPrepared;
-                player.sendMessage(getMessage("skills.unprepared")
+            // Message the player
+            int usedPoints = hero.getUsedSkillPreparePoints();
+            int maxPoints = hero.getTotalSkillPreparePoints();
+            int maxPrepared = hero.getPreparedSkillLimit();
+            int currentPrepared = hero.getPreparedSkillCount();
+            int remainingPoints = maxPoints - usedPoints;
+            int remainingSlots = maxPrepared - currentPrepared;
+            player.sendMessage(getMessage("skills.unprepared")
                     .replace("$skill", skillKey)
                     .replace("$points", Integer.toString(remainingPoints))
                     .replace("$slots", Integer.toString(remainingSlots)));
-            }
         }
     }
 
