@@ -70,7 +70,9 @@ public class SkillDescription implements Comparable<SkillDescription> {
     }
 
     public void setProfileState(ItemStack icon, boolean enabled) {
-        CompatibilityUtils.setSkullProfile(icon, enabled ? iconProfile : disabledProfile);
+        if(icon.getType() == Material.PLAYER_HEAD) {
+            CompatibilityUtils.setSkullProfile(icon, enabled ? iconProfile : disabledProfile);
+        }
     }
 
     public ItemStack updateIcon(HotbarController controller, Player player) {
