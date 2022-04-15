@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 
+import com.elmakers.mine.bukkit.heroes.HotbarPlugin;
 import com.elmakers.mine.bukkit.heroes.controller.HotbarController;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
@@ -149,9 +150,15 @@ public class CompatibilityUtils {
     }
 
     public static void setSkullProfile(ItemStack skull, PlayerProfile profile) {
-        SkullMeta meta = (SkullMeta)skull.getItemMeta();
-        meta.setOwnerProfile(profile);
-        skull.setItemMeta(meta);
+        try {
+            ItemMeta itemMeta = skull.getItemMeta();
+            SkullMeta meta = (SkullMeta)itemMeta;
+            meta.setOwnerProfile(profile);
+            skull.setItemMeta(meta);
+        }
+        catch(ClassCastException e) {
+            plugin.getLogger().log(Level.WARNING, "Failed to cast item meta for skill icon! " + e.toString());
+        }
     }
 
     public static PlayerProfile getPlayerProfile(String name, String url) {
