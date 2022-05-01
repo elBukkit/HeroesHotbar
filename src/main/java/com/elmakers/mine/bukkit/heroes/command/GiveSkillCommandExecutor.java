@@ -2,6 +2,7 @@ package com.elmakers.mine.bukkit.heroes.command;
 
 import com.elmakers.mine.bukkit.heroes.controller.HotbarController;
 import com.elmakers.mine.bukkit.heroes.controller.SkillDescription;
+import com.herocraftonline.heroes.characters.skill.PassiveSkill;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -50,6 +51,10 @@ public class GiveSkillCommandExecutor implements CommandExecutor {
         SkillDescription skillDescription = controller.getSkillDescription(player, skillName);
         if (skillDescription == null || !skillDescription.isValid()) {
             sender.sendMessage(ChatColor.RED + "Unknown skill: " + skillName);
+            return true;
+        }
+        if(skillDescription.getSkill() instanceof PassiveSkill) {
+            sender.sendMessage(ChatColor.RED + "You cannot give a passive skill to a player!");
             return true;
         }
 

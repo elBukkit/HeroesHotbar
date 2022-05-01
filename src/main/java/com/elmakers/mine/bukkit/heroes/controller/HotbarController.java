@@ -146,7 +146,7 @@ public class HotbarController {
      * @param player
      * @return
      */
-    public void getSkillItem(SkillDescription skill, Player player) {
+    public void updateSkillItem(SkillDescription skill, Player player) {
         ItemStack item = skill.getIcon();
 
         boolean passive = skill.getSkill() instanceof PassiveSkill || skill.getSkill() instanceof OutsourcedSkill;

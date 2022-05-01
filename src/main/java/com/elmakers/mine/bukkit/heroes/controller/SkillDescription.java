@@ -46,7 +46,7 @@ public class SkillDescription implements Comparable<SkillDescription> {
         }
 
         this.icon = new ItemStack(Material.PLAYER_HEAD, 1);
-        controller.getSkillItem(this, player);
+        controller.updateSkillItem(this, player);
     }
 
     public boolean isHeroes() {
