@@ -1,8 +1,14 @@
 package com.elmakers.mine.bukkit.heroes.utilities;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
+import java.util.logging.Level;
 
+import com.elmakers.mine.bukkit.heroes.HotbarPlugin;
+import com.elmakers.mine.bukkit.heroes.controller.HotbarController;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -12,8 +18,11 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.profile.PlayerProfile;
+import org.bukkit.profile.PlayerTextures;
 
 public class CompatibilityUtils {
     private static Plugin plugin;
@@ -134,5 +143,35 @@ public class CompatibilityUtils {
 
             list.add(colorPrefix + line);
         }
+    }
+    public static void getUnknownIcon(HotbarController controller, UUID uuid) {
+        PlayerProfile profile = plugin.getServer().createPlayerProfile(uuid);
+        profile.update().thenAcceptAsync(controller::setUnknownIcon, runnable -> Bukkit.getScheduler().runTask(plugin, runnable));
+    }
+
+    public static void setSkullProfile(ItemStack skull, PlayerProfile profile) {
+        try {
+            ItemMeta itemMeta = skull.getItemMeta();
+            SkullMeta meta = (SkullMeta)itemMeta;
+            meta.setOwnerProfile(profile);
+            skull.setItemMeta(meta);
+        }
+        catch(ClassCastException e) {
+            plugin.getLogger().log(Level.WARNING, "Failed to cast item meta for skill icon! " + e.toString());
+        }
+    }
+
+    public static PlayerProfile getPlayerProfile(String name, String url) {
+        PlayerProfile profile = plugin.getServer().createPlayerProfile(UUID.randomUUID(), name);
+        PlayerTextures texture = profile.getTextures();
+        try {
+            texture.setSkin(new URL(url));
+        }
+        catch(MalformedURLException e) {
+            plugin.getLogger().log(Level.WARNING, () -> "Url was malformed for skill icon " + name);
+            return null;
+        }
+        profile.setTextures(texture);
+        return profile;
     }
 }

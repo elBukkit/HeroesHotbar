@@ -1,5 +1,7 @@
-package com.elmakers.mine.bukkit.heroes;
+package com.elmakers.mine.bukkit.heroes.command;
 
+import com.elmakers.mine.bukkit.heroes.controller.SkillSelector;
+import com.elmakers.mine.bukkit.heroes.controller.HotbarController;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -43,7 +45,7 @@ public class SkillsMenuCommandExecutor implements CommandExecutor {
     }
 
     private void showSkillsMenu(Player player, int page) {
-        SkillSelector selector = new SkillSelector(controller, player);
+        SkillSelector selector = controller.getActiveSkillSelector(player);
         selector.setPage(page);
         selector.openInventory();
     }

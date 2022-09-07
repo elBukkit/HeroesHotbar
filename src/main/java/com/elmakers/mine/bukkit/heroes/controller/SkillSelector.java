@@ -1,30 +1,59 @@
-package com.elmakers.mine.bukkit.heroes;
+package com.elmakers.mine.bukkit.heroes.controller;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.logging.Level;
 
+import com.elmakers.mine.bukkit.heroes.controller.HotbarController;
+import com.elmakers.mine.bukkit.heroes.controller.SkillDescription;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 
 import com.elmakers.mine.bukkit.heroes.utilities.CompatibilityUtils;
+
+import javax.annotation.Nullable;
 
 public class SkillSelector {
     private final HotbarController controller;
     private final Player player;
 
     private int page;
-    private List<SkillDescription> allSkills = new ArrayList<>();
+    private Map<String, SkillDescription> allSkills;
     private String inventoryTitle;
+    private boolean guiOpen;
 
     public SkillSelector(HotbarController controller, Player player) {
         this.controller = controller;
         this.player = player;
+        guiOpen = false;
 
+        updateSkills();
+    }
+
+    public void updateSkills() {
+        this.allSkills = new LinkedHashMap<>();
+        getAllSkills().forEach(skill -> allSkills.put(skill.getKey(), skill));
+    }
+
+    public void updateSkillsForLevelUp() { //Need to update lore, and availability as well, updateSkills is used initially
+        this.allSkills = new LinkedHashMap<>();
+        getAllSkills().forEach(skill -> {
+            controller.updateSkillItem(skill.getIcon(), skill, player);
+            List<String> lore = new ArrayList<>();
+            controller.addSkillLore(skill, lore, player);
+            allSkills.put(skill.getKey(), skill);
+        });
+    }
+
+    //Resets all skills and recalculates them. This should only ever be called on a class change.
+    public void refreshAllSkills() {
+        this.allSkills = new LinkedHashMap<>();
+        getAllSkills().forEach(skill -> allSkills.put(skill.getKey(), skill));
+    }
+
+    public List<SkillDescription> getAllSkills() {
         String classString = controller.getClassName(player);
         String class2String = controller.getSecondaryClassName(player);
         String messageKey = !class2String.isEmpty() ? "skills.inventory_title_secondary" : "skills.inventory_title";
@@ -34,16 +63,22 @@ public class SkillSelector {
                 .replace("$class", classString);
 
         List<String> heroesSkills = controller.getSkillList(player, true, true);
+        List<SkillDescription> descriptions = new LinkedList<>();
         for (String heroesSkill : heroesSkills) {
-            allSkills.add(new SkillDescription(controller, player, heroesSkill));
+            descriptions.add(new SkillDescription(controller, player, heroesSkill));
         }
 
-        if (allSkills.size() == 0) {
+        if (descriptions.size() == 0) {
             player.sendMessage(controller.getMessage("skills.none", "You have no skills"));
-            return;
         }
 
-        Collections.sort(allSkills);
+        try {
+            Collections.sort(descriptions);
+        }
+        catch(ClassCastException e) {
+            controller.getLogger().log(Level.WARNING, "Could not sort skill descriptions!");
+        }
+        return descriptions;
     }
 
     public void setPage(int page) {
@@ -61,8 +96,11 @@ public class SkillSelector {
         int maxIndex = (pageIndex + 1) * inventorySize - 1;
 
         List<SkillDescription> skills = new ArrayList<>();
-        for (int i = startIndex; i <= maxIndex && i < allSkills.size(); i++) {
-            skills.add(allSkills.get(i));
+        Iterator<SkillDescription> iterator = allSkills.values().iterator();
+        int i = startIndex;
+        while(iterator.hasNext() && i <= maxIndex && i < allSkills.size()) {
+            skills.add(iterator.next());
+            i++;
         }
         if (skills.size() == 0) {
             String messageTemplate = controller.getMessage("skills.none_on_page", "No skills on page $page");
@@ -76,15 +114,27 @@ public class SkillSelector {
                 .replace("$pages", Integer.toString(numPages))
                 .replace("$page", Integer.toString(page));
         Inventory displayInventory = CompatibilityUtils.createInventory(null, invSize, title);
+
         for (SkillDescription skill : skills) {
-            ItemStack skillItem = controller.createSkillItem(skill, player);
-            if (skillItem == null) continue;
-            displayInventory.addItem(skillItem);
+            displayInventory.addItem(skill.updateIcon(controller, player));
         }
 
         player.closeInventory();
         player.openInventory(displayInventory);
-        controller.setActiveSkillSelector(player, this);
+        guiOpen = true;
+    }
+
+    public void setGuiState(boolean open) {
+        this.guiOpen = open;
+    }
+
+    public boolean isGuiOpen() {
+        return guiOpen;
+    }
+
+    @Nullable
+    public SkillDescription getSkill(String skillName) {
+        return this.allSkills.get(skillName);
     }
 
     public void onClick(InventoryClickEvent event) {

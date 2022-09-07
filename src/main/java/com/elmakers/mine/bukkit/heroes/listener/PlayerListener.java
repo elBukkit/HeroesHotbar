@@ -1,5 +1,9 @@
-package com.elmakers.mine.bukkit.heroes;
+package com.elmakers.mine.bukkit.heroes.listener;
 
+import com.elmakers.mine.bukkit.heroes.controller.HotbarController;
+import com.elmakers.mine.bukkit.heroes.controller.SkillSelector;
+import com.herocraftonline.heroes.api.events.AfterClassChangeEvent;
+import com.herocraftonline.heroes.api.events.HeroChangeLevelEvent;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -8,10 +12,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
-import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerItemHeldEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
@@ -28,6 +30,11 @@ public class PlayerListener implements Listener {
     }
 
     @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        controller.addActiveSkillSelector(event.getPlayer());
+    }
+
+    @EventHandler
     public void onPlayerDropItem(PlayerDropItemEvent event) {
         final Player player = event.getPlayer();
 
@@ -37,9 +44,8 @@ public class PlayerListener implements Listener {
 
         // Catch lag-related glitches dropping items from GUIs
         SkillSelector selector = controller.getActiveSkillSelector(player);
-        if (selector != null) {
+        if (selector != null && selector.isGuiOpen()) {
             event.setCancelled(true);
-            return;
         }
     }
 
@@ -49,7 +55,6 @@ public class PlayerListener implements Listener {
         ItemStack spawnedItem = itemEntity.getItemStack();
         if (controller.isSkill(spawnedItem) || controller.isLegacySkill(spawnedItem)) {
             event.setCancelled(true);
-            return;
         }
     }
 
@@ -88,7 +93,35 @@ public class PlayerListener implements Listener {
         ItemStack itemStack = event.getItemInHand();
         if (controller.isSkill(itemStack) || controller.isLegacySkill(itemStack)) {
             event.setCancelled(true);
-            return;
+        }
+    }
+
+    @EventHandler
+    public void onLevelUp(HeroChangeLevelEvent event) {
+        SkillSelector selector = controller.getActiveSkillSelector(event.getHero().getPlayer());
+        if(selector != null) {
+            selector.updateSkillsForLevelUp();
+        }
+    }
+
+    @EventHandler
+    public void onClassChange(AfterClassChangeEvent event) {
+        Player player = event.getHero().getPlayer();
+        SkillSelector selector = controller.getActiveSkillSelector(player);
+        if(selector != null) {
+            selector.refreshAllSkills();
+            controller.removeAllSkillItems(player);
+        }
+        else {
+            controller.addActiveSkillSelector(event.getHero().getPlayer());
+        }
+    }
+
+    @EventHandler
+    public void onInventoryClose(InventoryCloseEvent e) {
+        SkillSelector selector = controller.getActiveSkillSelector(e.getPlayer());
+        if(selector != null) {
+            selector.setGuiState(false);
         }
     }
 }

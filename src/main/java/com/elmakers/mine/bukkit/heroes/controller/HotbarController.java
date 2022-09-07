@@ -1,7 +1,5 @@
-package com.elmakers.mine.bukkit.heroes;
+package com.elmakers.mine.bukkit.heroes.controller;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,7 +14,6 @@ import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.entity.HumanEntity;
@@ -40,6 +37,9 @@ import com.herocraftonline.heroes.characters.skill.Skill;
 import com.herocraftonline.heroes.characters.skill.SkillConfigManager;
 import com.herocraftonline.heroes.characters.skill.SkillManager;
 import com.herocraftonline.heroes.characters.skill.SkillSetting;
+import org.bukkit.profile.PlayerProfile;
+
+import javax.annotation.Nullable;
 
 /**
  * This class manages the centralized hotbar functionality.
@@ -56,10 +56,11 @@ public class HotbarController {
     private String skillNBTKey;
     private String legacyNBTKey;
     private int skillInventoryRows;
-    private MaterialAndData defaultSkillIcon;
-    private String defaultDisabledIconURL;
 
-    private Map<UUID, SkillSelector> selectors = new HashMap<>();
+    private PlayerProfile disabledIcon;
+    private PlayerProfile unknownIcon;
+
+    private final Map<UUID, SkillSelector> selectors = new HashMap<>();
 
     public HotbarController(Plugin owningPlugin, Heroes heroesPlugin) {
         this.plugin = owningPlugin;
@@ -74,21 +75,21 @@ public class HotbarController {
             skillNBTKey = "heroesskill";
         }
         legacyNBTKey = config.getString("legacy_nbt_key");
-        defaultDisabledIconURL = config.getString("disabled_icon_url");
+        disabledIcon = CompatibilityUtils.getPlayerProfile("Disabled", config.getString("disabled_icon_url"));
+        unknownIcon = null;
+        CompatibilityUtils.getUnknownIcon(this, UUID.fromString("606e2ff0-ed77-4842-9d6c-e1d3321c7838"));
 
         skillInventoryRows = config.getInt("skill_inventory_max_rows", 6);
-        try {
-            defaultSkillIcon = new MaterialAndData(config.getString("default_skill_icon", "stick"));
-        } catch (Exception ex) {
-            plugin.getLogger().warning("Invalid icon in config: " + config.getString("default_skill_icon"));
-            defaultSkillIcon = new MaterialAndData(Material.STICK);
-        }
 
         int hotbarUpdateInterval = config.getInt("update_interval");
         if (hotbarUpdateInterval > 0) {
             final HotbarUpdateTask updateTask = new HotbarUpdateTask(this);
             plugin.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, updateTask, 0, hotbarUpdateInterval);
         }
+    }
+
+    public void setUnknownIcon(PlayerProfile profile) {
+        unknownIcon = profile;
     }
 
     public void clear() {
@@ -119,39 +120,44 @@ public class HotbarController {
         return nameTemplate.replace("$skill", skillName);
     }
 
-    public ItemStack createSkillItem(SkillDescription skill, Player player) {
-        ItemStack item = null;
-        MaterialAndData icon = skill.getIcon();
-        if (icon == null) {
-            icon = defaultSkillIcon;
+    @Nullable
+    public SkillDescription getSkillDescription(Player player, String skillName) {
+        SkillSelector selector = getActiveSkillSelector(player);
+        SkillDescription description = null;
+        if(selector != null) {
+            description = selector.getSkill(skillName);
         }
+        return description; //Null if selector is null or if skill name has not been added!
+    }
 
-        boolean unavailable = !canUseSkill(player, skill.getKey());
-        if (unavailable) {
-            MaterialAndData disabledIcon = skill.getDisabledIcon();
-            if (disabledIcon != null) {
-                icon = disabledIcon;
-            }
+    public boolean isGuiOpen(Player player) {
+        SkillSelector selector = this.selectors.get(player.getUniqueId());
+        if(selector == null) {
+            return false;
         }
-        item = icon.createItemStack();
-        if (item == null) {
-            plugin.getLogger().warning("Unable to create item stack for skill: " + skill.getName());
-            return null;
+        else {
+            return selector.isGuiOpen();
         }
+    }
 
-        // Set flags and NBT data
-        CompatibilityUtils.setMeta(item, skillNBTKey, skill.getKey());
-        CompatibilityUtils.makeUnbreakable(item);
-        CompatibilityUtils.hideFlags(item);
+    /**
+     * Get's a skill item. This updates any needed metadata it may pertain to as well
+     * @param skill
+     * @param player
+     * @return
+     */
+    public void updateSkillItem(SkillDescription skill, Player player) {
+        ItemStack item = skill.getIcon();
 
         boolean passive = skill.getSkill() instanceof PassiveSkill || skill.getSkill() instanceof OutsourcedSkill;
-        if (unavailable) {
-            CompatibilityUtils.setMetaBoolean(item, "unavailable", true);
-        }
         if (passive) {
             CompatibilityUtils.setMetaBoolean(item, "passive", true);
         }
 
+        updateSkillItem(item, skill, player);
+
+        CompatibilityUtils.makeUnbreakable(item);
+        CompatibilityUtils.hideFlags(item);
         // Set display name
         CompatibilityUtils.setDisplayName(item, getSkillTitle(player, skill.getName()));
 
@@ -159,8 +165,16 @@ public class HotbarController {
         List<String> lore = new ArrayList<>();
         addSkillLore(skill, lore, player);
         CompatibilityUtils.setLore(item, lore);
+    }
 
-        return item;
+    public void updateSkillItem(ItemStack item, SkillDescription skill, Player player) {
+        boolean unavailable = !canUseSkill(player, skill.getKey());
+
+        // Set flags and NBT data
+        CompatibilityUtils.setMeta(item, skillNBTKey, skill.getKey());
+
+        CompatibilityUtils.setMetaBoolean(item, "unavailable", unavailable);
+        skill.setProfileState(item, !unavailable);
     }
 
     protected Skill getSkill(String key) {
@@ -197,7 +211,6 @@ public class HotbarController {
         }
         return null;
     }
-
     public void addSkillLore(SkillDescription skillDescription, List<String> lore, Player player) {
         Hero hero = getHero(player);
         if (hero == null) return;
@@ -216,7 +229,7 @@ public class HotbarController {
         int level = SkillConfigManager.getUseSetting(hero, skill, SkillSetting.LEVEL, 1, true);
 
         String levelDescription = getMessage("skills.level_description", "").replace("$level", Integer.toString(level));
-        if (levelDescription != null && levelDescription.length() > 0) {
+        if (!levelDescription.isEmpty()) {
             lore.add(levelDescription);
         }
         String description = skill.getDescription(hero);
@@ -224,15 +237,6 @@ public class HotbarController {
             description = getMessage("skills.description", "$description").replace("$description", description);
             CompatibilityUtils.wrapText(description, MAX_LORE_LENGTH, lore);
         }
-
-        /*
-        // This looks like it just generates redundant lore?
-        description = skillDescription.getDescription();
-        if (description != null && description.length() > 0) {
-            description = getMessage("skills.description_extra", "$description").replace("$description", description);
-            InventoryUtils.wrapText(description, MAX_LORE_LENGTH, lore);
-        }
-        */
 
         int cooldown = SkillConfigManager.getUseSetting(hero, skill, SkillSetting.COOLDOWN, 0, true);
         if (cooldown > 0) {
@@ -248,9 +252,21 @@ public class HotbarController {
             lore.add(getMessage("skills.costs_description").replace("$description", manaDescription));
         }
 
+        int stamina = SkillConfigManager.getUseSetting(hero, skill, SkillSetting.STAMINA, 0, true);
+        if (stamina > 0) {
+            String staminaDescription = getMessage("costs.heroes_stamina").replace("$amount", Integer.toString(stamina));
+            lore.add(getMessage("skills.costs_description").replace("$description", staminaDescription));
+        }
+
         if (preparedPoints.isPresent() && isPrepared(player, skill.getName())) {
             lore.add(getMessage("skills.unprepare_lore"));
         }
+    }
+
+    public void updateSkillLore(SkillDescription skillDescription, Player player) {
+        List<String> lore = new ArrayList<>();
+        addSkillLore(skillDescription, lore, player);
+        CompatibilityUtils.setLore(skillDescription.getIcon(), lore);
     }
 
     public int getSkillLevel(Player player, String skillName) {
@@ -363,15 +379,22 @@ public class HotbarController {
         return hero.isSkillPrepared(skillName) || !hero.getSkillPrepareCost(skillName).isPresent();
     }
 
+    /**
+     * Gets active selector for player, may result in null if player is offline.
+     * @param player
+     * @return Skill selector for player, or null if player does not have one.
+     */
+    @Nullable
     public SkillSelector getActiveSkillSelector(HumanEntity player) {
         return selectors.get(player.getUniqueId());
     }
 
-    public void setActiveSkillSelector(HumanEntity player, SkillSelector selector) {
+    public void addActiveSkillSelector(HumanEntity player) {
+        SkillSelector selector = new SkillSelector(this, (Player) player);
         selectors.put(player.getUniqueId(), selector);
     }
 
-    public void clearActiveSkillSelector(HumanEntity player) {
+    public void clearActiveSkillSelector(Player player) {
         selectors.remove(player.getUniqueId());
     }
 
@@ -390,50 +413,58 @@ public class HotbarController {
         }
     }
 
+    public void removeAllSkillItems(Player player) {
+        Inventory inventory = player.getInventory();
+        for (int i = 0; i < inventory.getSize(); i++) {
+            ItemStack slotItem = inventory.getItem(i);
+            String slotKey = getSkillKey(slotItem);
+            if (slotKey != null) {
+                unprepareSkill(slotKey, player, slotItem);
+                inventory.setItem(i, null);
+            }
+        }
+    }
+
+    /**
+     * Attempts to unprepare a skill IF the item is a skill item. Does not remove the item
+     * @param player
+     * @param item The item which may or may not be a skill
+     */
     public void unprepareSkill(Player player, ItemStack item) {
         String skillKey = getSkillKey(item);
         if (skillKey != null && !skillKey.isEmpty()) {
+            unprepareSkill(skillKey, player, item);
+        }
+    }
 
-            // Always take all of the items away here, players can use this to
-            // "unprepare" skills that don't need preparing just to clean them out of their inventory
-            // Only do this if the skill selector is active.
-            SkillSelector activeSelector = getActiveSkillSelector(player);
-            if (activeSelector != null) {
-                Inventory inventory = player.getInventory();
-                for (int i = 0; i < inventory.getSize(); i++) {
-                    ItemStack slotItem = inventory.getItem(i);
-                    String slotKey = getSkillKey(slotItem);
-                    if (slotKey != null && slotKey.equals(skillKey)) {
-                        inventory.setItem(i, null);
-                    }
-                }
-            }
+    public void unprepareSkill(String skillKey, Player player, ItemStack item) {
+        // Always take all of the items away here, players can use this to
+        // "unprepare" skills that don't need preparing just to clean them out of their inventory
+        // Only do this if the skill selector is active.
+        SkillSelector activeSelector = getActiveSkillSelector(player);
 
-            // Make sure this skill can be unprepared
-            Hero hero = getHero(player);
-            Skill skill = getSkill(skillKey);
-            OptionalInt preparedPoints = hero.getSkillPrepareCost(skill);
-            if (preparedPoints.isPresent() && hero.isSkillPrepared(skillKey)) {
-                // Unprepare it, update item name
-                hero.unprepareSkill(skill);
-                CompatibilityUtils.setDisplayName(item, getSkillTitle(player, skillKey));
+        // Make sure this skill can be unprepared
+        Hero hero = getHero(player);
+        Skill skill = getSkill(skillKey);
+        OptionalInt preparedPoints = hero.getSkillPrepareCost(skill);
+        if (preparedPoints.isPresent() && hero.isSkillPrepared(skillKey)) {
+            // Unprepare it, update item name
+            hero.unprepareSkill(skill);
+            CompatibilityUtils.setDisplayName(item, getSkillTitle(player, skillKey));
 
-                List<String> lore = new ArrayList<>();
-                addSkillLore(new SkillDescription(this, player, skillKey), lore, player);
-                CompatibilityUtils.setLore(item, lore);
+            updateSkillLore(activeSelector.getSkill(skillKey), player);
 
-                // Message the player
-                int usedPoints = hero.getUsedSkillPreparePoints();
-                int maxPoints = hero.getTotalSkillPreparePoints();
-                int maxPrepared = hero.getPreparedSkillLimit();
-                int currentPrepared = hero.getPreparedSkillCount();
-                int remainingPoints = maxPoints - usedPoints;
-                int remainingSlots = maxPrepared - currentPrepared;
-                player.sendMessage(getMessage("skills.unprepared")
+            // Message the player
+            int usedPoints = hero.getUsedSkillPreparePoints();
+            int maxPoints = hero.getTotalSkillPreparePoints();
+            int maxPrepared = hero.getPreparedSkillLimit();
+            int currentPrepared = hero.getPreparedSkillCount();
+            int remainingPoints = maxPoints - usedPoints;
+            int remainingSlots = maxPrepared - currentPrepared;
+            player.sendMessage(getMessage("skills.unprepared")
                     .replace("$skill", skillKey)
                     .replace("$points", Integer.toString(remainingPoints))
                     .replace("$slots", Integer.toString(remainingSlots)));
-            }
         }
     }
 
@@ -475,9 +506,7 @@ public class HotbarController {
                             .replace("$points", Integer.toString(remainingPoints))
                             .replace("$slots", Integer.toString(remainingSlots)));
 
-                        List<String> lore = new ArrayList<>();
-                        addSkillLore(new SkillDescription(this, player, skillKey), lore, player);
-                        CompatibilityUtils.setLore(item, lore);
+                        updateSkillLore(this.getSkillDescription(player, skillKey), player);
                     }
                 }
             }
@@ -501,13 +530,15 @@ public class HotbarController {
         return plugin.getServer();
     }
 
-    public String getDefaultDisabledIconURL() {
-        return defaultDisabledIconURL;
+    public PlayerProfile getDefaultDisabledIcon() {
+        return disabledIcon;
+    }
+    public PlayerProfile getUnknownIcon() {
+        return unknownIcon;
     }
 
     public void delayedInventoryUpdate(final Player player) {
         plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
-            @SuppressWarnings("deprecation")
             @Override
             public void run() {
                 player.updateInventory();

@@ -1,5 +1,5 @@
 # Default skill icon if none is set in skill config
-default_skill_icon: stick
+default_skill_icon: player_head
 
 # Number of rows to show in the skill inventory
 skill_inventory_max_rows: 6
@@ -63,4 +63,5 @@ cooldown:
 
 costs:
     heroes_mana: "&6$amount &eMana"
+    heroes_stamina: "&6$amount &eStamina"
 

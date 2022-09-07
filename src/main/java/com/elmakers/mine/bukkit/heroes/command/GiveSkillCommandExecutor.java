@@ -1,5 +1,8 @@
-package com.elmakers.mine.bukkit.heroes;
+package com.elmakers.mine.bukkit.heroes.command;
 
+import com.elmakers.mine.bukkit.heroes.controller.HotbarController;
+import com.elmakers.mine.bukkit.heroes.controller.SkillDescription;
+import com.herocraftonline.heroes.characters.skill.PassiveSkill;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -26,11 +29,11 @@ public class GiveSkillCommandExecutor implements CommandExecutor {
             return true;
         }
         if (!(sender instanceof Player) && args.length <= 1) {
-            sender.sendMessage(ChatColor.RED + "Console Usage: giveskill <player> <skill>");
+            sender.sendMessage(ChatColor.RED + "Console Usage: /giveskill <player> <skill>");
             return true;
         }
         if (args.length <= 0) {
-            sender.sendMessage(ChatColor.RED + "Usage: giveskill [player] <skill>");
+            sender.sendMessage(ChatColor.RED + "Usage: /giveskill <player> <skill> or /giveskill <skill>");
             return true;
         }
 
@@ -44,13 +47,18 @@ public class GiveSkillCommandExecutor implements CommandExecutor {
         }
 
         String skillName = args.length > 1 ? args[1] : args[0];
-        SkillDescription skillDescription = new SkillDescription(controller, player, skillName);
-        if (!skillDescription.isValid()) {
+
+        SkillDescription skillDescription = controller.getSkillDescription(player, skillName);
+        if (skillDescription == null || !skillDescription.isValid()) {
             sender.sendMessage(ChatColor.RED + "Unknown skill: " + skillName);
             return true;
         }
+        if(skillDescription.getSkill() instanceof PassiveSkill) {
+            sender.sendMessage(ChatColor.RED + "You cannot give a passive skill to a player!");
+            return true;
+        }
 
-        ItemStack item = controller.createSkillItem(skillDescription, player);
+        ItemStack item = skillDescription.getIcon();
         player.getInventory().addItem(item);
         sender.sendMessage(ChatColor.LIGHT_PURPLE + "Gave skill " + skillName + " to " + player.getName());
         return true;

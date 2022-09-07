@@ -1,8 +1,7 @@
-package com.elmakers.mine.bukkit.heroes;
-
-import java.util.logging.Level;
+package com.elmakers.mine.bukkit.heroes.controller;
 
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import com.herocraftonline.heroes.characters.Hero;
@@ -10,7 +9,6 @@ import com.herocraftonline.heroes.characters.skill.Skill;
 import com.herocraftonline.heroes.characters.skill.SkillConfigManager;
 import com.herocraftonline.heroes.characters.skill.SkillSetting;
 
-@SuppressWarnings("deprecation")
 public class HotbarUpdateTask implements Runnable {
     private final HotbarController controller;
 
@@ -20,12 +18,8 @@ public class HotbarUpdateTask implements Runnable {
 
     @Override
     public void run() {
-        try {
-            for (Player player : controller.getServer().getOnlinePlayers()) {
-                updateHotbar(player);
-            }
-        } catch (Exception ex) {
-            controller.getLogger().log(Level.WARNING, "Error updating hotbar", ex);
+        for (Player player : controller.getServer().getOnlinePlayers()) {
+            updateHotbar(player);
         }
     }
 
@@ -48,15 +42,27 @@ public class HotbarUpdateTask implements Runnable {
         return SkillConfigManager.getUseSetting(hero, skill, SkillSetting.MANA, 0, true);
     }
 
+    public int getRequiredStamina(Player player, String skillKey) {
+        if (player == null) return 0;
+        Hero hero = controller.getHero(player);
+        if (hero == null) return 0;
+        Skill skill = controller.getSkill(skillKey);
+        if (skill == null) return 0;
+        return SkillConfigManager.getUseSetting(hero, skill, SkillSetting.STAMINA, 0, true);
+    }
+
     private void updateHotbar(Player player) {
+        Inventory inv = player.getInventory();
         for (int i = 0; i < 9; i++) {
-            ItemStack skillItem = player.getInventory().getItem(i);
+            ItemStack skillItem = inv.getItem(i);
+            if(skillItem == null || skillItem.getType().isAir()) continue;
             String skillKey = controller.getSkillKey(skillItem);
             if (skillKey == null || skillKey.isEmpty()) continue;
 
             int targetAmount = 1;
             long remainingCooldown = getRemainingCooldown(player, skillKey);
             int requiredMana = getRequiredMana(player, skillKey);
+            int requiredStamina = getRequiredStamina(player, skillKey);
             boolean canUse = controller.canUseSkill(player, skillKey);
 
             if (canUse && remainingCooldown == 0 && requiredMana == 0) {
@@ -71,8 +77,20 @@ public class HotbarUpdateTask implements Runnable {
                     if (requiredMana <= hero.getMaxMana()) {
                         float remainingMana = requiredMana - hero.getMana();
                         canUse = canUse && remainingMana <= 0;
-                        int targetManaTime = (int)Math.min(Math.ceil(remainingMana / hero.getManaRegen()), 99);
+                        int targetManaTime = (int)Math.min(Math.ceil(remainingMana / hero.getManaRegen()), 99); //fixme pretty sure this does jack shit
                         targetAmount = Math.max(targetManaTime, targetAmount);
+                    } else {
+                        targetAmount = 99;
+                        canUse = false;
+                    }
+                }
+                if(canUse && requiredStamina > 0) { //Only bother checking if has enough mana.
+                    Hero hero = controller.getHero(player);
+                    if (requiredStamina <= hero.getMaxStamina()) {
+                        float remainingStamina = requiredStamina - hero.getStamina();
+                        canUse = remainingStamina <= 0;
+                        int targetStaminaTime = (int)Math.min(Math.ceil(remainingStamina / hero.getStaminaRegen()), 99); //fixme pretty sure this does jack shit
+                        targetAmount = Math.max(targetStaminaTime, targetAmount);
                     } else {
                         targetAmount = 99;
                         canUse = false;
@@ -83,30 +101,21 @@ public class HotbarUpdateTask implements Runnable {
             if (targetAmount == 0) targetAmount = 1;
             boolean setAmount = false;
 
-            SkillDescription skillDescription = new SkillDescription(controller, player, skillKey);
-
-            MaterialAndData disabledIcon = skillDescription.getDisabledIcon();
-            MaterialAndData spellIcon = skillDescription.getIcon();
-            if (disabledIcon != null && spellIcon != null) {
+            SkillDescription skillDescription = controller.getSkillDescription(player, skillKey);
+            if(skillDescription != null) {
                 if (!canUse) {
-                    if (disabledIcon.getMaterial() != skillItem.getType() || disabledIcon.getData() != skillItem.getDurability()) {
-                        disabledIcon.applyToItem(skillItem);
-                    }
                     if (targetAmount == 99) {
                         if (skillItem.getAmount() != 1) {
                             skillItem.setAmount(1);
                         }
                         setAmount = true;
                     }
-                } else {
-                    if (spellIcon.getMaterial() != skillItem.getType() || spellIcon.getData() != skillItem.getDurability()) {
-                        spellIcon.applyToItem(skillItem);
-                    }
                 }
-            }
 
-            if (!setAmount && skillItem.getAmount() != targetAmount) {
-                skillItem.setAmount(targetAmount);
+                if (!setAmount && skillItem.getAmount() != targetAmount) {
+                    skillItem.setAmount(targetAmount);
+                }
+                //skillDescription.setProfileState(skillItem, canUse);
             }
         }
     }

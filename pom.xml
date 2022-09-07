@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.elmakers.mine.bukkit</groupId>
 	<artifactId>HeroesHotbar</artifactId>
-	<version>2.0</version>
+	<version>3.0</version>
 
 	<name>Heroes Hotbar</name>
 	<description>A hotbar GUI add-on to the Heroes Bukkit plugin</description>
@@ -14,14 +14,14 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<version.java>1.8</version.java>
-		<bukkit.version>1.16.5-R0.1-SNAPSHOT</bukkit.version>
+		<version.java>11</version.java>
+		<spigot.version>1.18.2-R0.1-SNAPSHOT</spigot.version>
 	</properties>
 
 	<licenses>
 		<license>
-		<name>MIT License</name>
-		<url>LICENSE</url>
+			<name>MIT License</name>
+			<url>LICENSE</url>
 		</license>
 	</licenses>
 
@@ -50,7 +50,7 @@
 		<snapshotRepository>
 			<id>maven.elmakers.com</id>
 			<url>http://maven.elmakers.com/repository/</url>
-			</snapshotRepository>
+		</snapshotRepository>
 	</distributionManagement>
 
 	<repositories>
@@ -60,41 +60,45 @@
 		</repository>
 
 		<repository>
+			<id>heroes-repo</id>
+			<url>https://nexus.hc.to/content/repositories/pub_releases/</url>
+		</repository>
+
+		<repository>
 			<id>spigot-repo</id>
-			<url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
+			<url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
 		</repository>
 	</repositories>
 
 	<dependencies>
 		<dependency>
-			<groupId>org.bukkit</groupId>
-			<artifactId>bukkit</artifactId>
-			<version>${bukkit.version}</version>
+			<groupId>org.spigotmc</groupId>
+			<artifactId>spigot-api</artifactId>
+			<version>${spigot.version}</version>
 			<scope>provided</scope>
 		</dependency>
 
-        <!-- Heroes from local jar -->
-        <dependency>
-            <groupId>com.herocraftonline.heroes</groupId>
-            <artifactId>Heroes</artifactId>
-            <version>1.8.13-SNAPSHOT</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/Heroes.jar</systemPath>
-        </dependency>
+		<!-- Heroes from local jar -->
+		<dependency>
+			<groupId>com.herocraftonline.heroes</groupId>
+			<artifactId>Heroes</artifactId>
+			<version>1.9.19-RELEASE</version>
+			<scope>provided</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-            </resource>
-        </resources>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.0.2</version>
+				<version>3.8.0</version>
 				<configuration>
 					<source>${version.java}</source>
 					<target>${version.java}</target>
@@ -106,7 +110,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
-				<version>3.0.0</version>
+				<version>3.2.4</version>
 				<executions>
 					<execution>
 						<phase>package</phase>
