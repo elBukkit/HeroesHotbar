@@ -36,7 +36,6 @@ import com.herocraftonline.heroes.characters.skill.PassiveSkill;
 import com.herocraftonline.heroes.characters.skill.Skill;
 import com.herocraftonline.heroes.characters.skill.SkillConfigManager;
 import com.herocraftonline.heroes.characters.skill.SkillManager;
-import com.herocraftonline.heroes.characters.skill.SkillSetting;
 import org.bukkit.profile.PlayerProfile;
 
 import javax.annotation.Nullable;
@@ -226,7 +225,7 @@ public class HotbarController {
             }
         }
 
-        int level = SkillConfigManager.getUseSetting(hero, skill, SkillSetting.LEVEL, 1, true);
+        int level = SkillConfigManager.getUseSetting(hero, skill, "level", 1, true);
 
         String levelDescription = getMessage("skills.level_description", "").replace("$level", Integer.toString(level));
         if (!levelDescription.isEmpty()) {
@@ -238,7 +237,7 @@ public class HotbarController {
             CompatibilityUtils.wrapText(description, MAX_LORE_LENGTH, lore);
         }
 
-        int cooldown = SkillConfigManager.getUseSetting(hero, skill, SkillSetting.COOLDOWN, 0, true);
+        int cooldown = SkillConfigManager.getUseSetting(hero, skill, "cooldown", 0, true);
         if (cooldown > 0) {
             String cooldownDescription = getTimeDescription(cooldown);
             if (cooldownDescription != null && !cooldownDescription.isEmpty()) {
@@ -246,13 +245,13 @@ public class HotbarController {
             }
         }
 
-        int mana = SkillConfigManager.getUseSetting(hero, skill, SkillSetting.MANA, 0, true);
+        int mana = SkillConfigManager.getUseSetting(hero, skill, "mana", 0, true);
         if (mana > 0) {
             String manaDescription = getMessage("costs.heroes_mana").replace("$amount", Integer.toString(mana));
             lore.add(getMessage("skills.costs_description").replace("$description", manaDescription));
         }
 
-        int stamina = SkillConfigManager.getUseSetting(hero, skill, SkillSetting.STAMINA, 0, true);
+        int stamina = SkillConfigManager.getUseSetting(hero, skill, "stamina", 0, true);
         if (stamina > 0) {
             String staminaDescription = getMessage("costs.heroes_stamina").replace("$amount", Integer.toString(stamina));
             lore.add(getMessage("skills.costs_description").replace("$description", staminaDescription));
@@ -274,7 +273,7 @@ public class HotbarController {
         if (skill == null) return 0;
         Hero hero = getHero(player);
         if (hero == null) return 0;
-        return SkillConfigManager.getUseSetting(hero, skill, SkillSetting.LEVEL, 1, true);
+        return SkillConfigManager.getUseSetting(hero, skill, "level", 1, true);
     }
 
     protected Hero getHero(Player player) {
@@ -309,7 +308,7 @@ public class HotbarController {
         for (String skillName : skillNames) {
             Skill skill = skills.getSkill(skillName);
             if (skill == null) continue;
-            int level = SkillConfigManager.getUseSetting(hero, skill, SkillSetting.LEVEL, 1, true);
+            int level = SkillConfigManager.getUseSetting(hero, skill, "level", 1, true);
             skillMap.put(level, skill);
         }
         return skillMap;

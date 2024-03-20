@@ -1,4 +1,12 @@
 
+# 3.0
+ 
+ - Lots of changes from RAVINGAR
+
+# 2.1
+
+ - Updated to work with Heroes 1.10.4, reference SkillSetting values by string
+
 # 2.0
 
  - 1.16 compatibility (only works with 1.16+ now)

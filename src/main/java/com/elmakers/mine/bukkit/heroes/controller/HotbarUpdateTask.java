@@ -7,7 +7,6 @@ import org.bukkit.inventory.ItemStack;
 import com.herocraftonline.heroes.characters.Hero;
 import com.herocraftonline.heroes.characters.skill.Skill;
 import com.herocraftonline.heroes.characters.skill.SkillConfigManager;
-import com.herocraftonline.heroes.characters.skill.SkillSetting;
 
 public class HotbarUpdateTask implements Runnable {
     private final HotbarController controller;
@@ -39,7 +38,7 @@ public class HotbarUpdateTask implements Runnable {
         if (hero == null) return 0;
         Skill skill = controller.getSkill(skillKey);
         if (skill == null) return 0;
-        return SkillConfigManager.getUseSetting(hero, skill, SkillSetting.MANA, 0, true);
+        return SkillConfigManager.getUseSetting(hero, skill, "mana", 0, true);
     }
 
     public int getRequiredStamina(Player player, String skillKey) {
@@ -48,7 +47,7 @@ public class HotbarUpdateTask implements Runnable {
         if (hero == null) return 0;
         Skill skill = controller.getSkill(skillKey);
         if (skill == null) return 0;
-        return SkillConfigManager.getUseSetting(hero, skill, SkillSetting.STAMINA, 0, true);
+        return SkillConfigManager.getUseSetting(hero, skill, "stamina", 0, true);
     }
 
     private void updateHotbar(Player player) {
